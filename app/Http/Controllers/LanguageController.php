@@ -2,38 +2,22 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers;
 
 use App\Models\Language;
 use Illuminate\Http\Request;
-use Brian2694\Toastr\Toastr;
 
 class LanguageController extends Controller
 {
-    /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * UserController Constructor.
-     *
-     * @param Toastr $toastr
-     */
-    public function __construct(Toastr $toastr)
-    {
-        $this->toastr = $toastr;
-    }
-
     /**
      * Set locale if it's allowed.
      *
@@ -66,8 +50,10 @@ class LanguageController extends Controller
     {
         $this->setLocale($locale, $request);
 
-        return redirect()->route('home')
-            ->with($this->toastr->success('Language Changed!!', 'Yay!', ['options']));
+        $url = config('language.url') ? url('/'.$locale) : url('/');
+
+        return redirect($url)
+            ->withSuccess('Language Changed!');
     }
 
     /**
@@ -82,7 +68,19 @@ class LanguageController extends Controller
     {
         $this->setLocale($locale, $request);
 
-        return redirect()->back()
-            ->with($this->toastr->success('Language Changed!!', 'Yay!', ['options']));
+        $session = $request->session();
+        if (config('language.url')) {
+            $previous_url = substr(str_replace(env('APP_URL'), '', $session->previousUrl()), 7);
+            if (strlen($previous_url) === 3) {
+                $previous_url = substr($previous_url, 3);
+            } else {
+                $previous_url = substr($previous_url, strrpos($previous_url, '/') + 1);
+            }
+            $url = rtrim(env('APP_URL'), '/').'/'.$locale.'/'.ltrim($previous_url, '/');
+            $session->setPreviousUrl($url);
+        }
+
+        return redirect($session->previousUrl())
+            ->withSuccess('Language Changed!');
     }
 }

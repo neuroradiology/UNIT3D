@@ -2,13 +2,13 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Services\Data;
@@ -215,7 +215,7 @@ class Movie
         if (strlen($title) > 4) {
             $might_be_year_one = str_replace(substr($title, 0, -6), '', $title);
             $might_be_year = str_replace(['(', ')'], '', $might_be_year_one);
-            if ($might_be_year > 1900 && $might_be_year < (date('Y') + 100)) {
+            if ($might_be_year > 1_900 && $might_be_year < (date('Y') + 100)) {
                 $title = trim(str_replace($might_be_year_one, '', $title));
             }
         }
@@ -282,10 +282,10 @@ class Movie
 
         if (is_array($genres)) {
             foreach ($genres as $genre) {
-                array_push($this->genres, $genre);
+                $this->genres[] = $genre;
             }
         } else {
-            array_push($this->genres, $genres);
+            $this->genres[] = $genres;
         }
     }
 }

@@ -1,14 +1,29 @@
 <?php
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
+ */
 
 return [
-    'poll'            => 'Poll',
-    'polls'           => 'Polls',
-    'current'         => 'Current Poll(s)',
-    'total'           => 'Total Votes Ever',
-    'vote-now'        => 'Get Your Vote In Now!',
-    'results'         => 'Poll Results',
-    'multiple-choice' => 'This is a multiple choice poll. Select as many answers as you like.',
-    'ip-checking'     => 'This poll has duplicate vote checking. You can only vote once.',
-    'vote'            => 'Vote',
-    'votes'           => 'Votes',
+  'add-option' => 'Lisa valik',
+  'create-poll' => 'Loo küsitlus',
+  'current' => 'Praegune küsitlus',
+  'delete-option' => 'Kustuta valik',
+  'multiple-choice' => 'See on mitme valiku küsitlus. Valige nii palju vastuseid kui soovite.',
+  'option' => 'Võimalus',
+  'poll' => 'Küsitlus',
+  'polls' => 'Küsitlused',
+  'results' => 'Küsitluse tulemused',
+  'title' => 'Pealkiri',
+  'total' => 'Hääle kokku',
+  'vote' => 'Hääleta',
+  'vote-now' => 'Hangi oma hääl nüüd!',
+  'votes' => 'Hääled',
 ];

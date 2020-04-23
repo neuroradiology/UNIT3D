@@ -2,22 +2,22 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Console\Commands;
 
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Group;
-use Illuminate\Console\Command;
 use App\Jobs\SendDisableUserMail;
+use App\Models\Group;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class AutoDisableInactiveUsers extends Command
 {
@@ -33,28 +33,31 @@ class AutoDisableInactiveUsers extends Command
      *
      * @var string
      */
-    protected $description = 'User Account Must Be Atleast x Days Old & User Account x Days Of Inactivity To Be Disabled';
+    protected $description = 'User account must be at least x days old & user account x days Of inactivity to be disabled';
 
     /**
      * Execute the console command.
+     *
+     * @throws \Exception
      *
      * @return mixed
      */
     public function handle()
     {
         if (config('pruning.user_pruning') == true) {
-            $disabledGroup = Group::where('slug', '=', 'disabled')->select('id')->first();
+            $disabled_group = cache()->rememberForever('disabled_group', fn () => Group::where('slug', '=', 'disabled')->pluck('id'));
+
             $current = Carbon::now();
 
-            $matches = User::whereIn('group_id', [config('pruning.group_ids')]);
+            $matches = User::whereIn('group_id', [config('pruning.group_ids')])->get();
 
             $users = $matches->where('created_at', '<', $current->copy()->subDays(config('pruning.account_age'))->toDateTimeString())
                 ->where('last_login', '<', $current->copy()->subDays(config('pruning.last_login'))->toDateTimeString())
-                ->get();
+                ->all();
 
             foreach ($users as $user) {
-                if ($user->getSeeding() !== 0) {
-                    $user->group_id = $disabledGroup->id;
+                if ($user->getSeeding() === 0) {
+                    $user->group_id = $disabled_group[0];
                     $user->can_upload = 0;
                     $user->can_download = 0;
                     $user->can_comment = 0;
@@ -69,5 +72,6 @@ class AutoDisableInactiveUsers extends Command
                 }
             }
         }
+        $this->comment('Automated User Disable Command Complete');
     }
 }

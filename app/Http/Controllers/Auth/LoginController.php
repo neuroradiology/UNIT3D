@@ -2,23 +2,21 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\Group;
-use App\Rules\Captcha;
-use Brian2694\Toastr\Toastr;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Group;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -28,25 +26,17 @@ class LoginController extends Controller
     protected $redirectTo = '/';
 
     // Max Attempts Until Lockout
-    public $maxAttempts = 5;
+    public $maxAttempts = 3;
 
     // Minutes Lockout
     public $decayMinutes = 60;
 
     /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
      * LoginController Constructor.
-     *
-     * @param Toastr $toastr
      */
-    public function __construct(Toastr $toastr)
+    public function __construct()
     {
         $this->middleware('guest', ['except' => 'logout']);
-        $this->toastr = $toastr;
     }
 
     public function username()
@@ -58,6 +48,8 @@ class LoginController extends Controller
      * Validate The User Login Request.
      *
      * @param \Illuminate\Http\Request $request
+     *
+     * @throws \Illuminate\Validation\ValidationException
      */
     protected function validateLogin(Request $request)
     {
@@ -65,41 +57,41 @@ class LoginController extends Controller
             $this->validate($request, [
                 $this->username()      => 'required|string',
                 'password'             => 'required|string',
-                'g-recaptcha-response' => new Captcha(),
+                'captcha'              => 'hiddencaptcha',
+            ]);
+        } else {
+            $this->validate($request, [
+                $this->username() => 'required|string',
+                'password'        => 'required|string',
             ]);
         }
-
-        $this->validate($request, [
-            $this->username() => 'required|string',
-            'password'        => 'required|string',
-        ]);
     }
 
     protected function authenticated(Request $request, $user)
     {
-        $bannedGroup = Group::where('slug', '=', 'banned')->select('id')->first();
-        $validatingGroup = Group::where('slug', '=', 'validating')->select('id')->first();
-        $disabledGroup = Group::where('slug', '=', 'disabled')->select('id')->first();
-        $memberGroup = Group::where('slug', '=', 'user')->select('id')->first();
+        $banned_group = cache()->rememberForever('banned_group', fn () => Group::where('slug', '=', 'banned')->pluck('id'));
+        $validating_group = cache()->rememberForever('validating_group', fn () => Group::where('slug', '=', 'validating')->pluck('id'));
+        $disabled_group = cache()->rememberForever('disabled_group', fn () => Group::where('slug', '=', 'disabled')->pluck('id'));
+        $member_group = cache()->rememberForever('member_group', fn () => Group::where('slug', '=', 'user')->pluck('id'));
 
-        if ($user->active == 0 || $user->group_id == $validatingGroup->id) {
+        if ($user->active == 0 || $user->group_id == $validating_group[0]) {
             $this->guard()->logout();
             $request->session()->invalidate();
 
             return redirect()->route('login')
-                ->with($this->toastr->error('This account has not been activated and is still in validating group. Please check your email for activation link. If you did not receive the activation code, please click "forgot password" and complete the steps.', 'Whoops!', ['options']));
+                ->withErrors(trans('auth.not-activated'));
         }
 
-        if ($user->group_id == $bannedGroup->id) {
+        if ($user->group_id == $banned_group[0]) {
             $this->guard()->logout();
             $request->session()->invalidate();
 
             return redirect()->route('login')
-                ->with($this->toastr->error('This account is Banned!', 'Whoops!', ['options']));
+                ->withErrors(trans('auth.banned'));
         }
 
-        if ($user->group_id == $disabledGroup->id) {
-            $user->group_id = $memberGroup->id;
+        if ($user->group_id == $disabled_group[0]) {
+            $user->group_id = $member_group[0];
             $user->can_upload = 1;
             $user->can_download = 1;
             $user->can_comment = 1;
@@ -109,12 +101,12 @@ class LoginController extends Controller
             $user->disabled_at = null;
             $user->save();
 
-            return redirect('/')
-                ->with($this->toastr->info('Welcome Back! Your Account Is No Longer Disabled!', $user->username, ['options']));
+            return redirect()->route('home.index')
+                ->withSuccess(trans('auth.welcome-restore'));
         }
 
-        if (auth()->viaRemember() && auth()->user()->group_id == $disabledGroup->id) {
-            $user->group_id = $memberGroup->id;
+        if (auth()->viaRemember() && $user->group_id == $disabled_group[0]) {
+            $user->group_id = $member_group[0];
             $user->can_upload = 1;
             $user->can_download = 1;
             $user->can_comment = 1;
@@ -124,11 +116,16 @@ class LoginController extends Controller
             $user->disabled_at = null;
             $user->save();
 
-            return redirect('/')
-                ->with($this->toastr->info('Welcome Back! Your Account Is No Longer Disabled!', $user->username, ['options']));
+            return redirect()->route('home.index')
+                ->withSuccess(trans('auth.welcome-restore'));
         }
 
-        return redirect('/')
-            ->with($this->toastr->info('Welcome Back!', $user->username, ['options']));
+        if ($user->read_rules == 0) {
+            return redirect()->to(config('other.rules_url'))
+                ->withWarning(trans('auth.require-rules'));
+        }
+
+        return redirect()->route('home.index')
+            ->withSuccess(trans('auth.welcome'));
     }
 }

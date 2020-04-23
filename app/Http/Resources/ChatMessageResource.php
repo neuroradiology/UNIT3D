@@ -2,20 +2,20 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Poppabear
  */
 
 namespace App\Http\Resources;
 
 use App\Helpers\Bbcode;
-use Illuminate\Http\Resources\Json\JsonResource;
 use ChristofferOK\LaravelEmojiOne\LaravelEmojiOne;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChatMessageResource extends JsonResource
 {
@@ -23,6 +23,8 @@ class ChatMessageResource extends JsonResource
      * Transform the resource into an array.
      *
      * @param \Illuminate\Http\Request $request
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @return array
      */
@@ -32,20 +34,22 @@ class ChatMessageResource extends JsonResource
 
         $logger = null;
         if ($this->user_id && $this->user_id == 1) {
-            $logger = Bbcode::parse('[div class="align-left"][div class="chatTriggers"]'.clean($this->message).'[/div][/div]');
+            $bbcode = new Bbcode();
+            $logger = $bbcode->parse('<div class="align-left"><div class="chatTriggers">'.$this->message.'</div></div>');
             $logger = $emojiOne->toImage($logger);
             $logger = str_replace('a href="/#', 'a trigger="bot" class="chatTrigger" href="/#', $logger);
         } else {
-            $logger = Bbcode::parse('[div class="align-left"]'.clean($this->message).'[/div]');
+            $bbcode = new Bbcode();
+            $logger = $bbcode->parse('<div class="align-left">'.$this->message.'</div>');
             $logger = $emojiOne->toImage($logger);
         }
 
         return [
-            'id' => $this->id,
-            'bot' => new BotResource($this->whenLoaded('bot')),
-            'user' => new UserResource($this->whenLoaded('user')),
-            'receiver' => new UserResource($this->whenLoaded('receiver')),
-            'chatroom' => new ChatRoomResource($this->whenLoaded('chatroom')),
+            'id'         => $this->id,
+            'bot'        => new BotResource($this->whenLoaded('bot')),
+            'user'       => new UserResource($this->whenLoaded('user')),
+            'receiver'   => new UserResource($this->whenLoaded('receiver')),
+            'chatroom'   => new ChatRoomResource($this->whenLoaded('chatroom')),
             'message'    => htmlspecialchars_decode($logger),
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),

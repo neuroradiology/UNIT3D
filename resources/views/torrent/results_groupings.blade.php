@@ -1,4 +1,11 @@
 <div style="width: 100% !important; display: table !important;">
+    <div class="align-center" style="width: 100% !important; display: table-cell !important;">
+        @if($links)
+            {{ $links->links() }}
+        @endif
+    </div>
+</div>
+<div style="width: 100% !important; display: table !important;">
     <div class="mb-5" style="width: 100% !important; display: table-cell !important;">
         @if($torrents && is_array($torrents))
             @foreach ($torrents as $k => $c)
@@ -17,42 +24,43 @@
                                 </span>&nbsp;
                             @endif
                                 <span class="badge-user text-bold" style="float: right;">
-                                                <i class="{{ config('other.font-awesome') }} fa-star text-gold"></i>
-                                                @if($t->movie && ($t->movie->imdbRating || $t->movie->tmdbVotes))
+                                                <i class="{{ config('other.font-awesome') }} fa-thumbs-up text-gold"></i>
+                                                @if($t->meta && ($t->meta->imdbRating || $t->meta->tmdbVotes))
                                         @if ($user->ratings == 1)
-                                            {{ $t->movie->imdbRating }}/10 ({{ $t->movie->imdbVotes }} @lang('torrent.votes'))
+                                            {{ $t->meta->imdbRating ?? '0' }}/10 ({{ $t->meta->imdbVotes ?? '0' }} @lang('torrent.votes'))
                                         @else
-                                            {{ $t->movie->tmdbRating }}/10 ({{ $t->movie->tmdbVotes }} @lang('torrent.votes'))
+                                            {{ $t->meta->tmdbRating ?? '0' }}/10 ({{ $t->meta->tmdbVotes ?? '0' }} @lang('torrent.votes'))
                                         @endif
                                     @endif
                                             </span>
                         </div>
                         <div class="card_alt">
                             <div class="body_poster">
-                                @if($t->movie && $t->movie->poster)
-                                    <img src="{{ $t->movie->poster }}" class="show-poster" data-image='<img src="{{ $t->movie->poster }}" alt="@lang('torrent.poster')" style="height: 1000px;">'>
+                                @if($t->meta && $t->meta->poster)
+                                    <img src="{{ $t->meta->poster }}" class="show-poster" alt="@lang('torrent.poster')"
+                                         data-image='<img src="{{ $t->meta->poster }}" alt="@lang('torrent.poster')" style="height: 1000px;">'>
                                 @else
-                                    <img src="https://via.placeholder.com/600x900" />
+                                    <img src="https://via.placeholder.com/600x900" alt="@lang('torrent.poster')" />
                                 @endif
                             </div>
                             <div class="body_grouping" style="width: 100%;">
                                 <h3 class="description_title">
-                                    {{ ($t->movie->title ? $t->movie->title : $t->name) }}
-                                    @if($t->movie && $t->movie->releaseYear)
-                                        <span class="text-bold text-pink"> {{ $t->movie->releaseYear }}</span>
+                                    {{ ($t->meta->title ? $t->meta->title : $t->name) }}
+                                    @if($t->meta && $t->meta->releaseYear)
+                                        <span class="text-bold text-pink"> {{ $t->meta->releaseYear }}</span>
                                     @endif
                                 </h3>
-                                @if ($t->movie && $t->movie->genres)
-                                    @foreach ($t->movie->genres as $genre)
+                                @if ($t->meta && $t->meta->genres)
+                                    @foreach ($t->meta->genres as $genre)
                                         <span class="genre-label">{{ $genre }}</span>
                                     @endforeach
                                 @endif
                                 <p class="description_plot" style="width: 100%;">
-                                    @if($t->movie && $t->movie->plot)
-                                        {{ $t->movie->plot }}
+                                    @if($t->meta && $t->meta->plot)
+                                        {{ $t->meta->plot }}
                                     @endif
                                 </p>
-                                <div class="card_holder" style="width: 100%";>
+                                <div class="card_holder" style="width: 100%;" ;>
                                     <hr style="padding: 0 !important; margin: 5px 0 !important; width: 100%;">
                                     <div style="padding: 10px 0; margin: auto;">
                                         <div class="table-responsive">
@@ -63,9 +71,9 @@
                                                     <th>@lang('torrent.name')</th>
                                                     <th><i class="{{ config('other.font-awesome') }} fa-clock"></i></th>
                                                     <th><i class="{{ config('other.font-awesome') }} fa-file"></i></th>
-                                                    <th><i class="{{ config('other.font-awesome') }} fa-check-square"></i></th>
                                                     <th><i class="{{ config('other.font-awesome') }} fa-arrow-circle-up"></i></th>
                                                     <th><i class="{{ config('other.font-awesome') }} fa-arrow-circle-down"></i></th>
+                                                    <th><i class="{{ config('other.font-awesome') }} fa-check-square"></i></th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -93,13 +101,23 @@
                                                 <tr class="{{ $class }}" style="{{ $hidden }}" torrent="{{ $attr }}">
                                                     @endif
                                                     <td>
-                                                        <a href="{{ route('category', ['slug' => $current->category->slug, 'id' => $current->category->id]) }}">
-                                                            <div class="text-center">
-                                                                <i class="{{ $current->category->icon }} torrent-icon" data-toggle="tooltip"
-                                                                   data-original-title="{{ $current->category->name }} {{ strtolower(trans('torrent.torrent')) }}"
-                                                                   style="padding-bottom: 6px;"></i>
-                                                            </div>
-                                                        </a>
+                                                        @if ($current->category->image != null)
+                                                            <a href="{{ route('categories.show', ['id' => $current->category->id]) }}">
+                                                                <div class="text-center">
+                                                                    <img src="{{ url('files/img/' . $current->category->image) }}" data-toggle="tooltip"
+                                                                         data-original-title="{{ $current->category->name }} {{ strtolower(trans('torrent.torrent')) }}"
+                                                                         style="padding-bottom: 6px;" alt="{{ $current->category->name }}">
+                                                                </div>
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('categories.show', ['id' => $current->category->id]) }}">
+                                                                <div class="text-center">
+                                                                    <i class="{{ $current->category->icon }} torrent-icon" data-toggle="tooltip"
+                                                                       data-original-title="{{ $current->category->name }} {{ strtolower(trans('torrent.torrent')) }}"
+                                                                       style="padding-bottom: 6px;"></i>
+                                                                </div>
+                                                            </a>
+                                                        @endif
                                                         <div class="text-center">
                                                             <span class="label label-success" data-toggle="tooltip" data-original-title="@lang('torrent.type')">
                                                                 {{ $current->type }}
@@ -107,18 +125,18 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a class="view-torrent" href="{{ route('torrent', ['slug' => $current->slug, 'id' => $current->id]) }}">
+                                                        <a class="view-torrent" href="{{ route('torrent', ['id' => $current->id]) }}">
                                                             {{ $current->name }}
                                                         </a>
                                                         @if (config('torrent.download_check_page') == 1)
-                                                            <a href="{{ route('download_check', ['slug' => $current->slug, 'id' => $current->id]) }}">
+                                                            <a href="{{ route('download_check', ['id' => $current->id]) }}">
                                                                 <button class="btn btn-primary btn-circle" type="button" data-toggle="tooltip"
                                                                         data-original-title="@lang('common.download')">
                                                                     <i class="{{ config('other.font-awesome') }} fa-download"></i>
                                                                 </button>
                                                             </a>
                                                         @else
-                                                            <a href="{{ route('download', ['slug' => $current->slug, 'id' => $current->id]) }}">
+                                                            <a href="{{ route('download', ['id' => $current->id]) }}">
                                                                 <button class="btn btn-primary btn-circle" type="button" data-toggle="tooltip"
                                                                         data-original-title="@lang('common.download')">
                                                                     <i class="{{ config('other.font-awesome') }} fa-download"></i>
@@ -126,14 +144,14 @@
                                                             </a>
                                                         @endif
 
-                                                        <span data-toggle="tooltip" data-original-title="Bookmark" id="torrentBookmark{{ $current->id }}" torrent="{{ $current->id }}" state="{{ $current->bookmarked() ? 1 : 0}}" class="torrentBookmark"></span>
+                                                        <span data-toggle="tooltip" data-original-title="Bookmark" id="torrentBookmark{{ $current->id }}" torrent="{{ $current->id }}" state="{{ $bookmarks->where('torrent_id', $current->id)->first() ? 1 : 0}}" class="torrentBookmark"></span>
 
                                                         <br>
                                                         @if ($current->anon == 1)
                                                             <span class="badge-extra text-bold">
                                                                 <i class="{{ config('other.font-awesome') }} fa-upload" data-toggle="tooltip" data-original-title="@lang('torrent.uploader')"></i> @lang('common.anonymous')
                                                                 @if ($user->id == $current->user->id || $user->group->is_modo)
-                                                                    <a href="{{ route('profile', ['username' => $current->user->username, 'id' => $current->user->id]) }}">
+                                                                    <a href="{{ route('users.show', ['username' => $current->user->username]) }}">
                                                                         ({{ $current->user->username }})
                                                                     </a>
                                                                 @endif
@@ -141,7 +159,7 @@
                                                         @else
                                                             <span class="badge-extra text-bold">
                                                                 <i class="{{ config('other.font-awesome') }} fa-upload" data-toggle="tooltip" data-original-title="@lang('torrent.uploader')"></i>
-                                                                    <a href="{{ route('profile', ['username' => $current->user->username, 'id' => $current->user->id]) }}">
+                                                                    <a href="{{ route('users.show', ['username' => $current->user->username]) }}">
                                                                         {{ $current->user->username }}
                                                                     </a>
                                                             </span>
@@ -159,7 +177,7 @@
                                                                         @if ($current->internal == 1)
                                                                             <span class='badge-extra text-bold'>
                                 <i class='{{ config("other.font-awesome") }} fa-magic' data-toggle='tooltip' title=''
-                                   data-original-title='@lang('torrent.internal-release')' style="color: #BAAF92"></i> @lang('torrent.internal')
+                                   data-original-title='@lang('torrent.internal-release')' style="color: #baaf92;"></i> @lang('torrent.internal')
                             </span>
                                                                         @endif
                                                                         @if ($current->stream == 1)
@@ -194,13 +212,13 @@
                                                                         @php $freeleech_token = \App\Models\FreeleechToken::where('user_id', '=', $user->id)->where('torrent_id', '=', $current->id)->first(); @endphp
                                                                         @if ($freeleech_token)
                                                                             <span class='badge-extra text-bold'>
-                                <i class='{{ config("other.font-awesome") }} fa-coins text-bold' data-toggle='tooltip' title=''
+                                <i class='{{ config("other.font-awesome") }} fa-star text-bold' data-toggle='tooltip' title=''
                                    data-original-title='@lang('torrent.freeleech-token')'></i> @lang('torrent.freeleech-token')
                             </span>
                                                                         @endif
 
                                                                         @if ($current->featured == 1)
-                                                                            <span class='badge-extra text-bold' style='background-image:url(https://i.imgur.com/F0UCb7A.gif);'>
+                                                                            <span class='badge-extra text-bold' style='background-image:url(/img/sparkels.gif);'>
                                 <i class='{{ config("other.font-awesome") }} fa-certificate text-pink' data-toggle='tooltip' title=''
                                    data-original-title='@lang('torrent.featured')'></i> @lang('torrent.featured')
                             </span>
@@ -216,7 +234,7 @@
                                                                         @if (config('other.freeleech') == 1)
                                                                             <span class='badge-extra text-bold'>
                                 <i class='{{ config("other.font-awesome") }} fa-globe text-blue' data-toggle='tooltip' title=''
-                                   data-original-title='@lang('torrent.global-freelech')'></i> @lang('torrent.global-freelech')
+                                   data-original-title='@lang('torrent.global-freeleech')'></i> @lang('torrent.global-freeleech')
                             </span>
                                                                         @endif
 
@@ -226,6 +244,14 @@
                                    data-original-title='@lang('torrent.double-upload')'></i> @lang('torrent.double-upload')
                             </span>
                                                                         @endif
+
+                                                        @if ($user->group->is_double_upload == 1)
+                                                            <span class='badge-extra text-bold'>
+                                                <i class='{{ config('other.font-awesome') }} fa-trophy text-purple'
+                                                   data-toggle='tooltip' title='' data-original-title='@lang('
+                                                    torrent.special-double_upload')'></i> @lang('torrent.special-double_upload')
+                                            </span>
+                                                        @endif
 
                                                                         @if ($current->leechers >= 5)
                                                                             <span class='badge-extra text-bold'>
@@ -269,23 +295,23 @@
                                                         <span class='badge-extra text-blue text-bold'>{{ $current->getSize() }}</span>
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('history', ['slug' => $current->slug, 'id' => $current->id]) }}">
-                            <span class='badge-extra text-orange text-bold'>
-                                {{ $current->times_completed }} @lang('common.times')
-                            </span>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <a href="{{ route('peers', ['slug' => $current->slug, 'id' => $current->id]) }}">
+                                                        <a href="{{ route('peers', ['id' => $current->id]) }}">
                             <span class='badge-extra text-green text-bold'>
                                 {{ $current->seeders }}
                             </span>
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('peers', ['slug' => $current->slug, 'id' => $current->id]) }}">
+                                                        <a href="{{ route('peers', ['id' => $current->id]) }}">
                             <span class='badge-extra text-red text-bold'>
                                 {{ $current->leechers }}
+                            </span>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ route('history', ['id' => $current->id]) }}">
+                            <span class='badge-extra text-orange text-bold'>
+                                {{ $current->times_completed }} @lang('common.times')
                             </span>
                                                         </a>
                                                     </td>

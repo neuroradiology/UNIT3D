@@ -2,22 +2,55 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Models;
 
 use App\Helpers\Bbcode;
+use App\Helpers\Linkify;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use voku\helper\AntiXSS;
 
+/**
+ * App\Models\Post.
+ *
+ * @property int $id
+ * @property string $content
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $user_id
+ * @property int $topic_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Like[] $likes
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\BonTransactions[] $tips
+ * @property-read \App\Models\Topic $topic
+ * @property-read \App\Models\User $user
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post whereTopicId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Post whereUserId($value)
+ * @mixin \Eloquent
+ *
+ * @property-read int|null $likes_count
+ * @property-read int|null $tips_count
+ */
 class Post extends Model
 {
+    use Auditable;
+
     /**
      * Belongs To A Topic.
      *
@@ -62,13 +95,30 @@ class Post extends Model
     }
 
     /**
+     * Set The Posts Content After Its Been Purified.
+     *
+     * @param string $value
+     *
+     * @return void
+     */
+    public function setContentAttribute($value)
+    {
+        $antiXss = new AntiXSS();
+
+        $this->attributes['content'] = $antiXss->xss_clean($value);
+    }
+
+    /**
      * Parse Content And Return Valid HTML.
      *
      * @return string Parsed BBCODE To HTML
      */
     public function getContentHtml()
     {
-        return Bbcode::parse($this->content);
+        $bbcode = new Bbcode();
+        $linkify = new Linkify();
+
+        return $bbcode->parse($linkify->linky($this->content), true);
     }
 
     /**
@@ -123,8 +173,7 @@ class Post extends Model
     public function getPageNumber()
     {
         $result = ($this->getPostNumber() - 1) / 25 + 1;
-        $result = floor($result);
 
-        return $result;
+        return floor($result);
     }
 }

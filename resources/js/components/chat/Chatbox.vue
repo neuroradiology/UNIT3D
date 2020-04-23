@@ -6,7 +6,7 @@
                 <div class="button-holder no-space">
                     <div class="button-left">
                         <h4>
-                            Chatbox v3.0 Beta
+                            <i class="fas fa-comment-dots"></i> Chatbox v3.0
                         </h4>
                     </div>
                     <div class="button-right">
@@ -25,7 +25,7 @@
                 <div id="frame" @mouseover="freezeChat()" @mouseout="unfreezeChat()">
                     <div class="content no-space">
                         <div class="button-holder nav nav-tabs mb-5" id="frameTabs">
-                            <div class="button-left-large">
+                            <div>
                                 <ul role="tablist" class="nav nav-tabs no-border mb-0" v-if="boot == 1">
                                     <li v-for="echo in echoes" v-if="echo.room && echo.room.name.length > 0"
                                         :class="tab != '' && tab === echo.room.name ? 'active' : null">
@@ -105,7 +105,7 @@
     }
     .panel-footer {
         padding: 5px;
-        margin: 0px;
+        margin: 0;
     }
     .mr-10 {
         margin-right: 10px;

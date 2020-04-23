@@ -2,23 +2,23 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Torrent;
 use App\Models\Graveyard;
-use Brian2694\Toastr\Toastr;
-use Illuminate\Http\Request;
+use App\Models\Torrent;
 use App\Repositories\TorrentFacetedRepository;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class GraveyardController extends Controller
 {
@@ -28,31 +28,26 @@ class GraveyardController extends Controller
     private $faceted;
 
     /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
      * GraveyardController Constructor.
      *
      * @param TorrentFacetedRepository $faceted
-     * @param Toastr                   $toastr
      */
-    public function __construct(TorrentFacetedRepository $faceted, Toastr $toastr)
+    public function __construct(TorrentFacetedRepository $faceted)
     {
         $this->faceted = $faceted;
-        $this->toastr = $toastr;
     }
 
     /**
      * Show The Graveyard.
      *
+     * @param \Illuminate\Http\Request $request
+     *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
         $current = Carbon::now();
-        $user = auth()->user();
+        $user = $request->user();
         $torrents = Torrent::with('category')->where('created_at', '<', $current->copy()->subDays(30)->toDateTimeString())->paginate(25);
         $repository = $this->faceted;
         $deadcount = Torrent::where('seeders', '=', 0)->where('created_at', '<', $current->copy()->subDays(30)->toDateTimeString())->count();
@@ -69,16 +64,18 @@ class GraveyardController extends Controller
      * Uses Input's To Put Together A Search.
      *
      * @param \Illuminate\Http\Request $request
-     * @param $torrent Torrent
+     * @param Torrent                  $torrent
+     *
+     * @throws \Throwable
      *
      * @return array
      */
     public function faceted(Request $request, Torrent $torrent)
     {
         $current = Carbon::now();
-        $user = auth()->user();
+        $user = $request->user();
         $search = $request->input('search');
-        $imdb_id = starts_with($request->get('imdb'), 'tt') ? $request->get('imdb') : 'tt'.$request->get('imdb');
+        $imdb_id = Str::startsWith($request->get('imdb'), 'tt') ? $request->get('imdb') : 'tt'.$request->get('imdb');
         $imdb = str_replace('tt', '', $imdb_id);
         $tvdb = $request->input('tvdb');
         $tmdb = $request->input('tmdb');
@@ -99,7 +96,7 @@ class GraveyardController extends Controller
         }
 
         if ($request->has('imdb') && $request->input('imdb') != null) {
-            $torrent->where('imdb', '=', $imdb);
+            $torrent->where('imdb', '=', str_replace('tt', '', $imdb));
         }
 
         if ($request->has('tvdb') && $request->input('tvdb') != null) {
@@ -145,24 +142,24 @@ class GraveyardController extends Controller
      * Resurrect A Torrent.
      *
      * @param \Illuminate\Http\Request $request
-     * @param $id
+     * @param \App\Models\Torrent      $id
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request, $id)
     {
-        $user = auth()->user();
+        $user = $request->user();
         $torrent = Torrent::findOrFail($id);
         $resurrected = Graveyard::where('torrent_id', '=', $torrent->id)->first();
 
         if ($resurrected) {
             return redirect()->route('graveyard.index')
-                ->with($this->toastr->error('Torrent Resurrection Failed! This torrent is already pending a resurrection.', 'Whoops!', ['options']));
+                ->withErrors('Torrent Resurrection Failed! This torrent is already pending a resurrection.');
         }
 
         if ($user->id === $torrent->user_id) {
             return redirect()->route('graveyard.index')
-                ->with($this->toastr->error('Torrent Resurrection Failed! You cannot resurrect your own uploads.', 'Whoops!', ['options']));
+                ->withErrors('Torrent Resurrection Failed! You cannot resurrect your own uploads.');
         }
 
         $resurrection = new Graveyard();
@@ -178,31 +175,31 @@ class GraveyardController extends Controller
 
         if ($v->fails()) {
             return redirect()->route('graveyard.index')
-                ->with($this->toastr->error($v->errors()->toJson(), 'Whoops!', ['options']));
-        } else {
-            $resurrection->save();
-
-            return redirect()->route('graveyard.index')
-                ->with($this->toastr->success('Torrent Resurrection Complete! You will be rewarded automatically once seedtime requirements are met.', 'Yay!', ['options']));
+                ->withErrors($v->errors());
         }
+        $resurrection->save();
+
+        return redirect()->route('graveyard.index')
+            ->withSuccess('Torrent Resurrection Complete! You will be rewarded automatically once seedtime requirements are met.');
     }
 
     /**
      * Cancel A Ressurection.
      *
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int                      $id
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $user = auth()->user();
+        $user = $request->user();
         $resurrection = Graveyard::findOrFail($id);
 
         abort_unless($user->group->is_modo || $user->id === $resurrection->user_id, 403);
         $resurrection->delete();
 
         return redirect()->route('graveyard.index')
-            ->with($this->toastr->success('Ressurection Successfully Canceled!', 'Yay!', ['options']));
+            ->withSuccess('Resurrection Successfully Canceled!');
     }
 }

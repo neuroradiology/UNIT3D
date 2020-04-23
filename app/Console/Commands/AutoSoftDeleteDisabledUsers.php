@@ -2,22 +2,22 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Console\Commands;
 
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Group;
-use Illuminate\Console\Command;
 use App\Jobs\SendDeleteUserMail;
+use App\Models\Group;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class AutoSoftDeleteDisabledUsers extends Command
 {
@@ -33,21 +33,23 @@ class AutoSoftDeleteDisabledUsers extends Command
      *
      * @var string
      */
-    protected $description = 'User Account Must Be In Disabled Group For Atleast x Days';
+    protected $description = 'User account must be In disabled group for at least x days';
 
     /**
      * Execute the console command.
+     *
+     * @throws \Exception
      *
      * @return mixed
      */
     public function handle()
     {
         if (config('pruning.user_pruning') == true) {
-            $disabledGroup = Group::where('slug', '=', 'disabled')->select('id')->first();
-            $prunedGroup = Group::where('slug', '=', 'pruned')->select('id')->first();
+            $disabled_group = cache()->rememberForever('disabled_group', fn () => Group::where('slug', '=', 'disabled')->pluck('id'));
+            $pruned_group = cache()->rememberForever('pruned_group', fn () => Group::where('slug', '=', 'pruned')->pluck('id'));
 
             $current = Carbon::now();
-            $users = User::where('group_id', '=', $disabledGroup->id)
+            $users = User::where('group_id', '=', $disabled_group[0])
                 ->where('disabled_at', '<', $current->copy()->subDays(config('pruning.soft_delete'))->toDateTimeString())
                 ->get();
 
@@ -61,11 +63,12 @@ class AutoSoftDeleteDisabledUsers extends Command
                 $user->can_invite = 0;
                 $user->can_request = 0;
                 $user->can_chat = 0;
-                $user->group = $prunedGroup->id;
+                $user->group_id = $pruned_group[0];
                 $user->deleted_by = 1;
                 $user->save();
                 $user->delete();
             }
         }
+        $this->comment('Automated Soft Delete Disabled Users Command Complete');
     }
 }

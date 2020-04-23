@@ -26,7 +26,7 @@
             <hr>
             <div class="row">
                 <div class="col-md-12">
-                    <p class="text-purple"><strong><i class="{{ config('other.font-awesome') }} fa-star"></i> @lang('stat.top-bankers')</strong>
+                    <p class="text-purple"><strong><i class="{{ config('other.font-awesome') }} fa-coins"></i> @lang('stat.top-bankers')</strong>
                         (@lang('bon.bon'))</p>
                     <table class="table table-condensed table-striped table-bordered">
                         <thead>
@@ -47,11 +47,11 @@
                                         <span class="badge-user text-bold"><span class="text-orange"><i
                                                         class="{{ config('other.font-awesome') }} fa-eye-slash"
                                                         aria-hidden="true"></i>{{ strtoupper(trans('common.hidden')) }}</span>@if (auth()->user()->id == $b->id || auth()->user()->group->is_modo)
-                                                <a href="{{ route('profile', ['username' => $b->username, 'id' => $b->id]) }}">({{ $b->username }}</a></span>
+                                                <a href="{{ route('users.show', ['username' => $b->username]) }}">({{ $b->username }}</a></span>
                                     @endif
                                     @else
                                         <span class="badge-user text-bold"><a
-                                                    href="{{ route('profile', ['username' => $b->username, 'id' => $b->id]) }}">{{ $b->username }}</a></span>
+                                                    href="{{ route('users.show', ['username' => $b->username]) }}">{{ $b->username }}</a></span>
                                     @endif
                                 </td>
                                 <td>

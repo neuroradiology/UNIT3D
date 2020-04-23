@@ -12,12 +12,7 @@ body {
     hyphens: auto;
     line-height: 1.4;
     margin: 0;
-    -moz-hyphens: auto;
-    -ms-word-break: break-all;
     width: 100% !important;
-    -webkit-hyphens: auto;
-    -webkit-text-size-adjust: none;
-    word-break: break-all;
     word-break: break-word;
 }
 
@@ -264,11 +259,9 @@ img {
 /* Promotions */
 
 .promotion {
-    background-color: #FFFFFF;
-    border: 2px dashed #9BA2AB;
-    margin: 0;
-    margin-bottom: 25px;
-    margin-top: 25px;
+    background-color: #ffffff;
+    border: 2px dashed #9ba2ab;
+    margin: 25px 0;
     padding: 24px;
     width: 100%;
     -premailer-cellpadding: 0;

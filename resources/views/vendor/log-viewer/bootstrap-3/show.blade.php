@@ -82,7 +82,7 @@
                     <form action="{{ route('log-viewer::logs.search', [$log->date, $level]) }}" method="GET">
                         <div class=form-group">
                             <div class="input-group">
-                                <input id="query" name="query" class="form-control"  value="{!! request('query') !!}" placeholder="Type here to search">
+                                <label for="query"></label><input id="query" name="query" class="form-control" value="{!! request('query') !!}" placeholder="Type here to search">
                                 <span class="input-group-btn">
                                     @if (request()->has('query'))
                                         <a href="{{ route('log-viewer::logs.show', [$log->date]) }}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
@@ -186,8 +186,8 @@
     <div id="delete-log-modal" class="modal fade">
         <div class="modal-dialog">
             <form id="delete-log-form" action="{{ route('log-viewer::logs.delete') }}" method="POST">
-                <input type="hidden" name="_method" value="DELETE">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                @method('DELETE')
+                @csrf
                 <input type="hidden" name="date" value="{{ $log->date }}">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -246,11 +246,15 @@
             });
 
             @unless (empty(log_styler()->toHighlight()))
+            @php
+                $htmlHighlight = version_compare(PHP_VERSION, '7.4.0') >= 0
+					? join('|', log_styler()->toHighlight())
+					: join(log_styler()->toHighlight(), '|');
+            @endphp
             $('.stack-content').each(function() {
                 var $this = $(this);
                 var html = $this.html().trim()
-                    .replace(/({!! join(log_styler()->toHighlight(), '|') !!})/gm, '<strong>$1</strong>');
-
+                        .replace(/({!! $htmlHighlight !!})/gm, '<strong>$1</strong>');
                 $this.html(html);
             });
             @endunless

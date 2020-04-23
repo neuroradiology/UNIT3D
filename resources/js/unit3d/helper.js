@@ -1,7 +1,7 @@
 /*
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
  * @project    UNIT3D
@@ -293,7 +293,7 @@ class userFilterBuilder {
             userFilterXHR.abort();
         }
         userFilterXHR = $.ajax({
-            url: '/'+userName+'.'+userId+'/userFilters',
+            url: '/users/'+userName+'/userFilters',
             data: {
                 _token: this.csrf,
                 page: page,
@@ -336,7 +336,7 @@ class userFilterBuilder {
             },
             type: 'post',
             beforeSend: function () {
-                $("#userFilter").html('<i class="'+this.font+' fa-spinner fa-spin fa-3x fa-fw"></i>')
+                $("#userFilter").html('<i class="fal fa-spinner fa-spin fa-3x fa-fw"></i>')
             }
         }).done(function (e) {
             $data = $(e);
@@ -427,6 +427,9 @@ class facetedSearchBuilder {
         var tvdb = $("#tvdb").val();
         var tmdb = $("#tmdb").val();
         var mal = $("#mal").val();
+        var igdb = $("#igdb").val();
+        var start_year = $("#start_year").val();
+        var end_year = $("#end_year").val();
         var categories = [];
         var types = [];
         var genres = [];
@@ -591,6 +594,9 @@ class facetedSearchBuilder {
                 view: this.view,
                 tmdb: tmdb,
                 mal: mal,
+                igdb: igdb,
+                start_year: start_year,
+                end_year: end_year,
                 categories: categories,
                 types: types,
                 genres: genres,
@@ -611,7 +617,7 @@ class facetedSearchBuilder {
             },
             type: 'get',
             beforeSend: function () {
-                $("#facetedSearch").html('<i class="'+this.font+' fa-spinner fa-spin fa-3x fa-fw"></i>')
+                $("#facetedSearch").html('<i class="fal fa-spinner fa-spin fa-3x fa-fw"></i>')
             }
         }).done(function (e) {
             $data = $(e);
@@ -637,10 +643,10 @@ class facetedSearchBuilder {
                 e.preventDefault();
                 var name = $(this).attr('data-name');
                 var image = $(this).attr('data-image');
-                swal({
+                Swal.fire({
                     showConfirmButton: false,
                     showCloseButton: true,
-                    background: '#232323',
+                    background: 'rgb(35,35,35)',
                     width: 970,
                     html: image,
                     title: name,
@@ -730,19 +736,19 @@ class facetedSearchBuilder {
     init(type) {
         this.type = type;
         if (this.type == 'card') {
-            this.api = '/filterTorrents';
+            this.api = '/torrents/filter';
             this.view = 'card';
         }
         else if (this.type == 'request') {
-            this.api = '/filterRequests';
+            this.api = '/requests/filter';
             this.view = 'request';
         }
         else if (this.type == 'group') {
-            this.api = '/filterTorrents';
+            this.api = '/torrents/filter';
             this.view = 'group';
         }
         else {
-            this.api = '/filterTorrents';
+            this.api = '/torrents/filter';
             this.view = 'list';
         }
 
@@ -837,7 +843,7 @@ class configExtensionBuilder {
         this.keyv = keyv;
         this.val = val;
         this.input = val.replace(/['"]/g,'');
-        swal({
+        Swal.fire({
             title: 'Change Value',
             width: '800px',
             inputAttributes: {
@@ -872,7 +878,7 @@ class configExtensionBuilder {
             allowOutsideClick: false
         }).then(result => {
             if (result.value) {
-                swal({
+                Swal.fire({
                     title: 'Value Has Been Changed',
                     timer: 1500,
                     onOpen: () => {
@@ -943,6 +949,11 @@ class torrentBookmarkBuilder {
         this.destroy(id,custom);
     }
     create(id,custom) {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
         if(torrentBookmarkXHR != null) {
             torrentBookmarkXHR.abort();
@@ -951,15 +962,15 @@ class torrentBookmarkBuilder {
         torrentBookmarkXHR = new XMLHttpRequest();
 
         torrentBookmarkXHR = $.ajax({
-            url: '/torrents/bookmark/' + id,
+            url: '/bookmarks/' + id + '/store',
             data: {
                 _token: this.csrf,
             },
-            type: 'get'
+            type: 'POST'
         }).done(function (e) {
-            swal({
+            Swal.fire({
                 position: 'center',
-                type: 'success',
+                icon: 'success',
                 title: 'Torrent Has Been Bookmarked Successfully!',
                 showConfirmButton: false,
                 timer: 4500,
@@ -977,6 +988,11 @@ class torrentBookmarkBuilder {
         });
     }
     destroy(id,custom) {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
         if(torrentBookmarkXHR != null) {
             return;
@@ -985,15 +1001,16 @@ class torrentBookmarkBuilder {
         torrentBookmarkXHR = new XMLHttpRequest();
 
         torrentBookmarkXHR = $.ajax({
-            url: '/torrents/unbookmark/' + id,
+            url: '/bookmarks/' + id + '/destroy',
             data: {
                 _token: this.csrf,
+                _method: 'DELETE',
             },
-            type: 'get'
+            type: 'POST'
         }).done(function (e) {
-            swal({
+            Swal.fire({
                 position: 'center',
-                type: 'success',
+                icon: 'success',
                 title: 'Torrent Has Been Unbookmarked Successfully!',
                 showConfirmButton: false,
                 timer: 4500,
@@ -1021,7 +1038,6 @@ $(document).ajaxComplete(function () {
 $(document).ready(function () {
     if (document.getElementById('request-form-description')) {
         $('#request-form-description').wysibb({});
-        emoji.textcomplete()
     }
     if($('#comments').length > 0) {
         if (window.location.hash && window.location.hash.substring) {
@@ -1033,7 +1049,6 @@ $(document).ready(function () {
     }
     if($('#upload-form-description').length > 0) {
         $('#upload-form-description').wysibb({});
-        emoji.textcomplete()
     }
     if(document.getElementById('facetedSearch')) {
         var facetedType = document.getElementById('facetedSearch').getAttribute('type');
@@ -1098,12 +1113,6 @@ $(document).mousedown(function(){
     }
     audioLoaded = 1;
 });
-if(document.getElementById('add')) {
-    document.querySelector("#add").addEventListener("click", () => {
-        var optionHTML = '<div class="form-group"><label for="mediainfo">MediaInfo</label><textarea rows="2" class="form-control" name="mediainfo" cols="50" id="mediainfo" placeholder="Paste MediaInfo"></textarea></div>';
-        document.querySelector(".parser").innerHTML = optionHTML;
-    });
-}
 if(document.getElementById('torrent')) {
     document.querySelector("#torrent").addEventListener("change", () => {
         uploadExtension.hook();

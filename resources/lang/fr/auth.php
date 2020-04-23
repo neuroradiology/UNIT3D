@@ -1,18 +1,28 @@
 <?php
-/*
- * |--------------------------------------------------------------------------
- * | Authentication Language Lines
- * |--------------------------------------------------------------------------
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
  */
+
 return [
-    'failed'              => 'Ces informations didentification ne correspondent pas à nos enregistrements.',
-    'throttle'            => 'Trop de tentatives de connexion. Veuillez réessayer dans quelques secondes.',
-    'login'               => 'Se connecter',
-    'signup'              => 'Senregistrer',
-    'logout'              => 'Se déconnecter',
-    'username'            => 'Nom dutilisateur',
-    'password'            => 'Mot de passe',
-    'lost-password'       => 'Mot de passe oublié?',
-    'recover-my-password' => 'Recover My Password',
-    'remember-me'         => 'Se souvenir de moi',
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Language Lines
+    |--------------------------------------------------------------------------
+    |
+    | The following language lines are used during authentication for various
+    | messages that we need to display to the user. You are free to modify
+    | these language lines according to your application's requirements.
+    |
+    */
+
+    'failed'   => 'Ces identifiants ne correspondent pas à nos enregistrements',
+    'throttle' => 'Tentatives de connexion trop nombreuses. Veuillez essayer de nouveau dans :seconds secondes.',
 ];

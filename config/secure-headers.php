@@ -2,13 +2,13 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 return [
@@ -62,6 +62,14 @@ return [
      */
 
     'x-permitted-cross-domain-policies' => 'none',
+
+    /*
+     * X-Power-By
+     *
+     * Note: it will not add to response header if the value is empty string.
+     */
+
+    'x-power-by' => '',
 
     /*
      * X-XSS-Protection
@@ -118,6 +126,8 @@ return [
         'max-age' => 15552000,
 
         'include-sub-domains' => false,
+
+        'preload' => false,
     ],
 
     /*
@@ -176,120 +186,14 @@ return [
          * the priority is 'none' > '*' > 'self allow'.
          */
 
-        'autoplay' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'camera' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'encrypted-media' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'fullscreen' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'geolocation' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'microphone' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'midi' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'payment' => [
-            'none' => false,
-
-            '*' => false,
-
-            'self' => true,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
-        'picture-in-picture' => [
-            'none' => false,
-
-            '*' => true,
-
-            'self' => false,
-
-            'allow' => [
-                // 'url',
-            ],
-        ],
-
         'accelerometer' => [
             'none' => false,
 
             '*' => false,
 
             'self' => true,
+
+            'src' => false,
 
             'allow' => [
                 // 'url',
@@ -303,6 +207,106 @@ return [
 
             'self' => true,
 
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'autoplay' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'camera' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'display-capture' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'document-domain' => [
+            'none' => false,
+
+            '*' => true,
+
+            'self' => false,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'encrypted-media' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'fullscreen' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'geolocation' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
             'allow' => [
                 // 'url',
             ],
@@ -314,6 +318,8 @@ return [
             '*' => false,
 
             'self' => true,
+
+            'src' => false,
 
             'allow' => [
                 // 'url',
@@ -327,6 +333,64 @@ return [
 
             'self' => true,
 
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'microphone' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'midi' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'payment' => [
+            'none' => false,
+
+            '*' => false,
+
+            'self' => true,
+
+            'src' => false,
+
+            'allow' => [
+                // 'url',
+            ],
+        ],
+
+        'picture-in-picture' => [
+            'none' => false,
+
+            '*' => true,
+
+            'self' => false,
+
+            'src' => false,
+
             'allow' => [
                 // 'url',
             ],
@@ -338,6 +402,8 @@ return [
             '*' => false,
 
             'self' => true,
+
+            'src' => false,
 
             'allow' => [
                 // 'url',
@@ -351,6 +417,8 @@ return [
 
             'self' => false,
 
+            'src' => false,
+
             'allow' => [
                 // 'url',
             ],
@@ -363,6 +431,8 @@ return [
 
             'self' => true,
 
+            'src' => false,
+
             'allow' => [
                 // 'url',
             ],
@@ -374,6 +444,8 @@ return [
             '*' => false,
 
             'self' => true,
+
+            'src' => false,
 
             'allow' => [
                 // 'url',
@@ -411,10 +483,6 @@ return [
 
         'script-src' => [
             'allow' => [
-                'https://www.google.com/recaptcha/api.js',
-                'https://www.google.com/recaptcha/',
-                'https://www.gstatic.com/recaptcha/api2/',
-                'https://www.gstatic.com/recaptcha/api2/v1550471573786/recaptcha__en.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment-with-locales.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.15.35/js/bootstrap-datetimepicker.min.js',
@@ -482,6 +550,7 @@ return [
 
         'img-src' => [
             'schemes' => [
+                'data:',
                 'https:',
             ],
             'self' => true,
@@ -498,16 +567,16 @@ return [
 
         'connect-src' => [
             'allow' => [
-                'https://'.substr(env('APP_URL'), 7).':8443/socket.io/',
-                'wss://'.substr(env('APP_URL'), 7).':8443/socket.io/',
+                'https://'.parse_url(env('APP_URL'), PHP_URL_HOST).':8443/socket.io/',
+                'wss://'.parse_url(env('APP_URL'), PHP_URL_HOST).':8443/socket.io/',
             ],
             'self' => true,
         ],
 
         'font-src' => [
             'schemes' => [
-                'https:',
                 'data:',
+                'https:',
             ],
             'self' => true,
             'data' => true,
@@ -528,10 +597,6 @@ return [
             'self' => true,
         ],
 
-        /*'manifest-src' => [
-            //
-        ],*/
-
         'media-src' => [
             'self' => true,
         ],
@@ -540,9 +605,9 @@ return [
             //
         ],
 
-        /*'worker-src' => [
+        'worker-src' => [
             //
-        ],*/
+        ],
 
         'plugin-types' => [
             // 'application/x-shockwave-flash',

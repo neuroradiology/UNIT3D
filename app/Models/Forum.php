@@ -2,22 +2,77 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Models;
 
 use App\Notifications\NewTopic;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Forum.
+ *
+ * @property int $id
+ * @property int|null $position
+ * @property int|null $num_topic
+ * @property int|null $num_post
+ * @property int|null $last_topic_id
+ * @property string|null $last_topic_name
+ * @property string|null $last_topic_slug
+ * @property int|null $last_post_user_id
+ * @property string|null $last_post_user_username
+ * @property string|null $name
+ * @property string|null $slug
+ * @property string|null $description
+ * @property int|null $parent_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Forum[] $forums
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Permission[] $permissions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Topic[] $sub_topics
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Topic[] $subscription_topics
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Subscription[] $subscriptions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Topic[] $topics
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereLastPostUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereLastPostUserUsername($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereLastTopicId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereLastTopicName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereLastTopicSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereNumPost($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereNumTopic($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereParentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum wherePosition($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Forum whereUpdatedAt($value)
+ * @mixin \Eloquent
+ *
+ * @property-read int|null $forums_count
+ * @property-read int|null $permissions_count
+ * @property-read int|null $sub_topics_count
+ * @property-read int|null $subscription_topics_count
+ * @property-read int|null $subscriptions_count
+ * @property-read int|null $topics_count
+ */
 class Forum extends Model
 {
+    use Auditable;
+
     /**
      * Has Many Topic.
      *
@@ -95,6 +150,9 @@ class Forum extends Model
     /**
      * Notify Subscribers Of A Forum When New Topic Is Made.
      *
+     * @param $poster
+     * @param $topic
+     *
      * @return string
      */
     public function notifySubscribers($poster, $topic)
@@ -114,6 +172,27 @@ class Forum extends Model
     }
 
     /**
+     * Notify Staffers When New Staff Topic Is Made.
+     *
+     * @param $poster
+     * @param $topic
+     *
+     * @return string
+     */
+    public function notifyStaffers($poster, $topic)
+    {
+        $staffers = User::leftJoin('groups', 'users.group_id', '=', 'groups.id')
+            ->select('users.id')
+            ->where('users.id', '<>', $poster->id)
+            ->where('groups.is_modo', 1)
+            ->get();
+
+        foreach ($staffers as $staffer) {
+            $staffer->notify(new NewTopic('staff', $poster, $topic));
+        }
+    }
+
+    /**
      * Returns A Table With The Forums In The Category.
      *
      * @return string
@@ -125,6 +204,8 @@ class Forum extends Model
 
     /**
      * Returns A Table With The Forums In The Category.
+     *
+     * @param $forumId
      *
      * @return string
      */
@@ -146,6 +227,8 @@ class Forum extends Model
     /**
      * Count The Number Of Posts In The Forum.
      *
+     * @param $forumId
+     *
      * @return string
      */
     public function getPostCount($forumId)
@@ -163,6 +246,8 @@ class Forum extends Model
     /**
      * Count The Number Of Topics In The Forum.
      *
+     * @param $forumId
+     *
      * @return string
      */
     public function getTopicCount($forumId)
@@ -179,12 +264,8 @@ class Forum extends Model
      */
     public function getPermission()
     {
-        if (auth()->check()) {
-            $group = auth()->user()->group;
-        } else {
-            $group = Group::find(2);
-        }
+        $group = auth()->check() ? auth()->user()->group : Group::where('slug', 'guest')->first();
 
-        return Permission::whereRaw('forum_id = ? AND group_id = ?', [$this->id, $group->id])->first();
+        return $group->permissions->where('forum_id', $this->id)->first();
     }
 }

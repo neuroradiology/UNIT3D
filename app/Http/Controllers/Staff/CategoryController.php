@@ -2,41 +2,27 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers\Staff;
 
-use App\Models\Category;
-use Brian2694\Toastr\Toastr;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Image;
 
 class CategoryController extends Controller
 {
     /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * CategoryController Constructor.
-     *
-     * @param Toastr $toastr
-     */
-    public function __construct(Toastr $toastr)
-    {
-        $this->toastr = $toastr;
-    }
-
-    /**
-     * Get The Categories.
+     * Display All Categories.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -48,59 +34,75 @@ class CategoryController extends Controller
     }
 
     /**
-     * Category Add Form.
+     * Show Form For Creating A New Category.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function addForm()
+    public function create()
     {
-        return view('Staff.category.add');
+        return view('Staff.category.create');
     }
 
     /**
-     * Add A Category.
+     * Store A Category.
      *
      * @param \Illuminate\Http\Request $request
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function add(Request $request)
+    public function store(Request $request)
     {
         $category = new Category();
         $category->name = $request->input('name');
-        $category->slug = str_slug($category->name);
+        $category->slug = Str::slug($category->name);
         $category->position = $request->input('position');
         $category->icon = $request->input('icon');
-        $category->meta = $request->input('meta');
+        $category->movie_meta = $request->input('movie_meta');
+        $category->tv_meta = $request->input('tv_meta');
+        $category->game_meta = $request->input('game_meta');
+        $category->music_meta = $request->input('music_meta');
+        $category->no_meta = $request->input('no_meta');
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = 'category-'.uniqid().'.'.$image->getClientOriginalExtension();
+            $path = public_path('/files/img/'.$filename);
+            Image::make($image->getRealPath())->fit(40, 40)->encode('png', 100)->save($path);
+            $category->image = $filename;
+        } else {
+            $category->image = null;
+        }
 
         $v = validator($category->toArray(), [
-            'name'     => 'required',
-            'slug'     => 'required',
-            'position' => 'required',
-            'icon'     => 'required',
-            'meta'     => 'required',
+            'name'          => 'required',
+            'slug'          => 'required',
+            'position'      => 'required',
+            'icon'          => 'required',
+            'movie_meta'    => 'required',
+            'tv_meta'       => 'required',
+            'game_meta'     => 'required',
+            'music_meta'    => 'required',
+            'no_meta'       => 'required',
         ]);
 
         if ($v->fails()) {
-            return redirect()->route('staff_category_index')
-                ->with($this->toastr->error($v->errors()->toJson(), 'Whoops!', ['options']));
-        } else {
-            $category->save();
-
-            return redirect()->route('staff_category_index')
-                ->with($this->toastr->success('Category Successfully Added', 'Yay!', ['options']));
+            return redirect()->route('staff.categories.index')
+                ->withErrors($v->errors());
         }
+        $category->save();
+
+        return redirect()->route('staff.categories.index')
+            ->withSuccess('Category Successfully Added');
     }
 
     /**
      * Category Edit Form.
      *
-     * @param $slug
-     * @param $id
+     * @param \App\Models\Category $id
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function editForm($slug, $id)
+    public function edit($id)
     {
         $category = Category::findOrFail($id);
 
@@ -108,56 +110,69 @@ class CategoryController extends Controller
     }
 
     /**
-     * Edit A Category.
+     * Update A Category.
      *
      * @param \Illuminate\Http\Request $request
-     * @param $slug
-     * @param $id
+     * @param \App\Models\Category     $id
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function edit(Request $request, $slug, $id)
+    public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
         $category->name = $request->input('name');
-        $category->slug = str_slug($category->name);
+        $category->slug = Str::slug($category->name);
         $category->position = $request->input('position');
         $category->icon = $request->input('icon');
-        $category->meta = $request->input('meta');
+        $category->movie_meta = $request->input('movie_meta');
+        $category->tv_meta = $request->input('tv_meta');
+        $category->game_meta = $request->input('game_meta');
+        $category->music_meta = $request->input('music_meta');
+        $category->no_meta = $request->input('no_meta');
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = 'category-'.uniqid().'.'.$image->getClientOriginalExtension();
+            $path = public_path('/files/img/'.$filename);
+            Image::make($image->getRealPath())->fit(40, 40)->encode('png', 100)->save($path);
+            $category->image = $filename;
+        }
 
         $v = validator($category->toArray(), [
-            'name'     => 'required',
-            'slug'     => 'required',
-            'position' => 'required',
-            'icon'     => 'required',
-            'meta'     => 'required',
+            'name'          => 'required',
+            'slug'          => 'required',
+            'position'      => 'required',
+            'icon'          => 'required',
+            'movie_meta'    => 'required',
+            'tv_meta'       => 'required',
+            'game_meta'     => 'required',
+            'music_meta'    => 'required',
+            'no_meta'       => 'required',
         ]);
 
         if ($v->fails()) {
-            return redirect()->route('staff_category_index')
-                ->with($this->toastr->error($v->errors()->toJson(), 'Whoops!', ['options']));
-        } else {
-            $category->save();
-
-            return redirect()->route('staff_category_index')
-                ->with($this->toastr->success('Category Successfully Modified', 'Yay!', ['options']));
+            return redirect()->route('staff.categories.index')
+                ->withErrors($v->errors());
         }
+        $category->save();
+
+        return redirect()->route('staff.categories.index')
+            ->withSuccess('Category Successfully Modified');
     }
 
     /**
-     * Delete A Category.
+     * Destroy A Category.
      *
-     * @param $id
-     * @param $slug
+     * @param \App\Models\Category $id
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function delete($slug, $id)
+    public function destroy($id)
     {
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return redirect()->route('staff_category_index')
-            ->with($this->toastr->success('Category Successfully Deleted', 'Yay!', ['options']));
+        return redirect()->route('staff.categories.index')
+            ->withSuccess('Category Successfully Deleted');
     }
 }

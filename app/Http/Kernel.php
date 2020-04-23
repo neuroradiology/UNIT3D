@@ -1,15 +1,14 @@
 <?php
-
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http;
@@ -26,23 +25,17 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
-        //Default Laravel
+        // Default Laravel
         \App\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
 
-        //Secure Headers
+        // Extra
         \Bepsvpt\SecureHeaders\SecureHeadersMiddleware::class,
-
-        //HTTP2ServerPush
         \App\Http\Middleware\Http2ServerPush::class,
-
-        //HtmlEncrypt
         //\App\Http\Middleware\HtmlEncrypt::class,
-
-        //AJAX
         //\App\Http\Middleware\ProAjaxMiddleware::class,
     ];
 
@@ -56,12 +49,12 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
-            // \Illuminate\Session\Middleware\AuthenticateSession::class,
+            \Illuminate\Session\Middleware\AuthenticateSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\UpdateLastAction::class,
         ],
-
         'api' => [
             'throttle:60,1',
             'bindings',
@@ -76,22 +69,38 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'active'        => \App\Http\Middleware\CheckIfActive::class,
         'admin'         => \App\Http\Middleware\CheckForAdmin::class,
         'auth'          => \App\Http\Middleware\Authenticate::class,
+        'auth.basic'    => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'banned'        => \App\Http\Middleware\CheckIfBanned::class,
         'bindings'      => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can'           => \Illuminate\Auth\Middleware\Authorize::class,
-        'check_ip'      => \App\Http\Middleware\CheckIfAlreadyVoted::class,
         'csrf'          => \App\Http\Middleware\VerifyCsrfToken::class,
         'guest'         => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'language'      => \App\Http\Middleware\SetLanguage::class,
         'modo'          => \App\Http\Middleware\CheckForModo::class,
-        'online'        => \App\Http\Middleware\CheckIfOnline::class,
         'owner'         => \App\Http\Middleware\CheckForOwner::class,
-        'private'       => \App\Http\Middleware\CheckForPrivate::class,
         'throttle'      => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'twostep'       => \App\Http\Middleware\TwoStepAuth::class,
+        'signed'        => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'verified'      => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+    ];
+
+    /**
+     * The priority-sorted list of middleware.
+     *
+     * This forces non-global middleware to always be in the given order.
+     *
+     * @var array
+     */
+    protected $middlewarePriority = [
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \App\Http\Middleware\Authenticate::class,
+        \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        \Illuminate\Session\Middleware\AuthenticateSession::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Auth\Middleware\Authorize::class,
     ];
 }

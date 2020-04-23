@@ -2,22 +2,23 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Poppabear
  */
 
 namespace App\Console\Commands;
 
 use App\Console\ConsoleTools;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class GitUpdater extends Command
 {
@@ -41,6 +42,14 @@ class GitUpdater extends Command
      * @var string
      */
     protected $description = 'Executes The Commands Necessary To Update Your Website Using Git';
+
+    /**
+     * @var string[]
+     */
+    private const ADDITIONAL = [
+        '.env',
+        'laravel-echo-server.json',
+    ];
 
     /**
      * Create a new command instance.
@@ -105,7 +114,7 @@ class GitUpdater extends Command
     {
         $updating = $this->checkForUpdates();
 
-        if (count($updating) > 0) {
+        if ((is_countable($updating) ? count($updating) : 0) > 0) {
             $this->alertDanger('Found Updates');
 
             $this->cyan('Files that need updated:');
@@ -148,13 +157,13 @@ class GitUpdater extends Command
                     $this->compile();
                 }
 
+                $this->clearCache();
+
                 if ($this->io->confirm('Install new packages (composer install)', true)) {
                     $this->composer();
                 }
 
                 $this->updateUNIT3DConfig();
-
-                $this->clearCache();
 
                 $this->setCache();
 
@@ -190,7 +199,7 @@ class GitUpdater extends Command
         $this->red('Updating will cause you to LOSE any changes you might have made to the file!');
 
         foreach ($updating as $file) {
-            if ($this->io->confirm("Update $file", true)) {
+            if ($this->io->confirm(sprintf('Update %s', $file), true)) {
                 $this->updateFile($file);
             }
         }
@@ -200,7 +209,7 @@ class GitUpdater extends Command
 
     private function updateFile($file)
     {
-        $this->process("git checkout origin/master -- $file");
+        $this->process(sprintf('git checkout origin/master -- %s', $file));
     }
 
     private function backup(array $paths)
@@ -226,7 +235,7 @@ class GitUpdater extends Command
         $this->header('Restoring Backups');
 
         foreach ($paths as $path) {
-            $to = str_replace_last('/.', '', base_path(dirname($path)));
+            $to = Str::replaceLast('/.', '', base_path(dirname($path)));
             $from = storage_path('gitupdate').'/'.$path;
 
             if (is_dir($from)) {
@@ -234,7 +243,7 @@ class GitUpdater extends Command
                 $from .= '/*';
             }
 
-            $this->process("$this->copy_command $from $to");
+            $this->process(sprintf('%s %s %s', $this->copy_command, $from, $to));
         }
 
         $this->commands([
@@ -307,7 +316,7 @@ class GitUpdater extends Command
     private function validatePath($path)
     {
         if (! is_file(base_path($path)) && ! is_dir(base_path($path))) {
-            $this->red("The path '$path' is invalid");
+            $this->red(sprintf('The path \'%s\' is invalid', $path));
             //$this->call('up');
             //die();
         }
@@ -315,12 +324,12 @@ class GitUpdater extends Command
 
     private function createBackupPath($path)
     {
-        if (! is_dir(storage_path("gitupdate/$path")) && ! is_file(base_path($path))) {
-            mkdir(storage_path("gitupdate/$path"), 0775, true);
+        if (! is_dir(storage_path(sprintf('gitupdate/%s', $path))) && ! is_file(base_path($path))) {
+            mkdir(storage_path(sprintf('gitupdate/%s', $path)), 0775, true);
         } elseif (is_file(base_path($path)) && dirname($path) !== '.') {
             $path = dirname($path);
-            if (! is_dir(storage_path("gitupdate/$path"))) {
-                mkdir(storage_path("gitupdate/$path"), 0775, true);
+            if (! is_dir(storage_path(sprintf('gitupdate/%s', $path)))) {
+                mkdir(storage_path(sprintf('gitupdate/%s', $path)), 0775, true);
             }
         }
     }
@@ -345,12 +354,6 @@ class GitUpdater extends Command
         $p = $this->process('git diff master --name-only');
         $paths = array_filter(explode("\n", $p->getOutput()), 'strlen');
 
-        $additional = [
-            '.env',
-            'laravel-echo-server.json',
-            'public/files',
-        ];
-
-        return array_merge($paths, $additional);
+        return array_merge($paths, self::ADDITIONAL);
     }
 }

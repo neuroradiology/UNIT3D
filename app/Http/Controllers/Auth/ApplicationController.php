@@ -2,40 +2,25 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\Application;
-use Brian2694\Toastr\Toastr;
-use Illuminate\Http\Request;
-use App\Models\ApplicationUrlProof;
 use App\Http\Controllers\Controller;
+use App\Models\Application;
 use App\Models\ApplicationImageProof;
+use App\Models\ApplicationUrlProof;
+use Illuminate\Http\Request;
 
 class ApplicationController extends Controller
 {
-    /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * ApplicationController Constructor.
-     *
-     * @param Toastr $toastr
-     */
-    public function __construct(Toastr $toastr)
-    {
-        $this->toastr = $toastr;
-    }
-
     /**
      * Application Add Form.
      *
@@ -47,70 +32,103 @@ class ApplicationController extends Controller
     }
 
     /**
-     * Add A Application.
+     * Store A New Application.
      *
      * @param \Illuminate\Http\Request $request
-     * @return Illuminate\Http\RedirectResponse
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        $application = new Application();
+        $application = resolve(Application::class);
         $application->type = $request->input('type');
         $application->email = $request->input('email');
         $application->referrer = $request->input('referrer');
 
         if (config('email-white-blacklist.enabled') === 'allow') {
-            $v = validator($request->all(), [
-                'type' => 'required',
-                'email' => 'required|email|unique:invites|unique:users|unique:applications|email_list:allow',
-                'referrer' => 'required',
-                'images.*' => 'filled',
-                'images'   => 'min:2',
-                'links.*' => 'filled',
-                'links'   => 'min:2',
-            ]);
+            if (config('captcha.enabled') == false) {
+                $v = validator($request->all(), [
+                    'type'     => 'required',
+                    'email'    => 'required|email|unique:invites|unique:users|unique:applications|email_list:allow',
+                    'referrer' => 'required',
+                    'images.*' => 'filled',
+                    'images'   => 'min:2',
+                    'links.*'  => 'filled',
+                    'links'    => 'min:2',
+                ]);
+            } else {
+                $v = validator($request->all(), [
+                    'type'     => 'required',
+                    'email'    => 'required|email|unique:invites|unique:users|unique:applications|email_list:allow',
+                    'referrer' => 'required',
+                    'images.*' => 'filled',
+                    'images'   => 'min:2',
+                    'links.*'  => 'filled',
+                    'links'    => 'min:2',
+                    'captcha'  => 'hiddencaptcha',
+                ]);
+            }
         } elseif (config('email-white-blacklist.enabled') === 'block') {
-            $v = validator($request->all(), [
-                'type' => 'required',
-                'email' => 'required|email|unique:invites|unique:users|unique:applications|email_list:block',
-                'referrer' => 'required',
-                'images.*' => 'filled',
-                'images'   => 'min:2',
-                'links.*' => 'filled',
-                'links'   => 'min:2',
-            ]);
+            if (config('captcha.enabled') == false) {
+                $v = validator($request->all(), [
+                    'type'     => 'required',
+                    'email'    => 'required|email|unique:invites|unique:users|unique:applications|email_list:block',
+                    'referrer' => 'required',
+                    'images.*' => 'filled',
+                    'images'   => 'min:2',
+                    'links.*'  => 'filled',
+                    'links'    => 'min:2',
+                ]);
+            } else {
+                $v = validator($request->all(), [
+                    'type'     => 'required',
+                    'email'    => 'required|email|unique:invites|unique:users|unique:applications|email_list:block',
+                    'referrer' => 'required',
+                    'images.*' => 'filled',
+                    'images'   => 'min:2',
+                    'links.*'  => 'filled',
+                    'links'    => 'min:2',
+                    'captcha'  => 'hiddencaptcha',
+                ]);
+            }
         } else {
-            $v = validator($request->all(), [
-                'type' => 'required',
-                'email' => 'required|email|unique:invites|unique:users|unique:applications',
-                'referrer' => 'required',
-                'images.*' => 'filled',
-                'images'   => 'min:2',
-                'links.*' => 'filled',
-                'links'   => 'min:2',
-            ]);
+            if (config('captcha.enabled') == false) {
+                $v = validator($request->all(), [
+                    'type'     => 'required',
+                    'email'    => 'required|email|unique:invites|unique:users|unique:applications',
+                    'referrer' => 'required',
+                    'images.*' => 'filled',
+                    'images'   => 'min:2',
+                    'links.*'  => 'filled',
+                    'links'    => 'min:2',
+                ]);
+            } else {
+                $v = validator($request->all(), [
+                    'type'     => 'required',
+                    'email'    => 'required|email|unique:invites|unique:users|unique:applications',
+                    'referrer' => 'required',
+                    'images.*' => 'filled',
+                    'images'   => 'min:2',
+                    'links.*'  => 'filled',
+                    'links'    => 'min:2',
+                    'captcha'  => 'hiddencaptcha',
+                ]);
+            }
         }
 
         if ($v->fails()) {
             return redirect()->route('application.create')
-                ->with($this->toastr->error($v->errors()->toJson(), 'Whoops!', ['options']));
-        } else {
-            $application->save();
-
-            // Map And Save IMG Proofs
-            $imgs = collect($request->input('images'))->map(function ($value) {
-                return new ApplicationImageProof(['image' => $value]);
-            });
-            $application->imageProofs()->saveMany($imgs);
-
-            // Map And Save URL Proofs
-            $urls = collect($request->input('links'))->map(function ($value) {
-                return new ApplicationUrlProof(['url' => $value]);
-            });
-            $application->urlProofs()->saveMany($urls);
-
-            return redirect()->route('login')
-                ->with($this->toastr->success('Your Application Has Been Submitted. You will receive a email soon!', 'Yay!', ['options']));
+                ->withErrors($v->errors());
         }
+        $application->save();
+        // Map And Save IMG Proofs
+        $imgs = collect($request->input('images'))->map(fn ($value) => new ApplicationImageProof(['image' => $value]));
+        $application->imageProofs()->saveMany($imgs);
+        // Map And Save URL Proofs
+        $urls = collect($request->input('links'))->map(fn ($value) => new ApplicationUrlProof(['url' => $value]));
+        $application->urlProofs()->saveMany($urls);
+
+        return redirect()->route('login')
+            ->withSuccess(trans('auth.application-submitted'));
     }
 }

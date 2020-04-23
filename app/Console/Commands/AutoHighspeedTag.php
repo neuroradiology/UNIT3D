@@ -2,19 +2,19 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Console\Commands;
 
 use App\Models\Peer;
-use App\Models\Client;
+use App\Models\Seedbox;
 use App\Models\Torrent;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -44,10 +44,10 @@ class AutoHighspeedTag extends Command
     {
         DB::table('torrents')->update(['highspeed' => 0]);
 
-        $seedbox_users = Client::select('user_id')->get()->toArray();
+        $seedbox_users = Seedbox::select(['user_id'])->get()->toArray();
 
         if (is_array($seedbox_users) && count($seedbox_users) > 0) {
-            $torid = Peer::select('torrent_id')->whereIn('user_id', $seedbox_users)->where('seeder', '=', 1)->get()->toArray();
+            $torid = Peer::select(['torrent_id'])->whereIn('user_id', $seedbox_users)->where('seeder', '=', 1)->get()->toArray();
 
             foreach ($torid as $id) {
                 $torrent = Torrent::where('id', '=', $id)->first();
@@ -57,5 +57,6 @@ class AutoHighspeedTag extends Command
                 unset($torrent);
             }
         }
+        $this->comment('Automated High Speed Torrents Command Complete');
     }
 }

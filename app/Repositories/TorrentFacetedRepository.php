@@ -2,20 +2,20 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Repositories;
 
+use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Type;
-use App\Models\Category;
 
 class TorrentFacetedRepository
 {
@@ -36,7 +36,7 @@ class TorrentFacetedRepository
      */
     public function types()
     {
-        return Type::all()->where('slug', '!=', 'sd')->sortBy('position')->pluck('name', 'id');
+        return Type::all()->sortBy('position')->pluck('name', 'id');
     }
 
     /**
@@ -57,12 +57,12 @@ class TorrentFacetedRepository
     public function sorting()
     {
         return [
-            'created_at'      => 'Date',
-            'name'            => 'Name',
-            'seeders'         => 'Seeders',
-            'leechers'        => 'Leechers',
-            'times_completed' => 'Times Completed',
-            'size'            => 'Size',
+            'created_at'      => trans('torrent.date'),
+            'name'            => trans('torrent.name'),
+            'seeders'         => trans('torrent.seeders'),
+            'leechers'        => trans('torrent.leechers'),
+            'times_completed' => trans('torrent.completed-times'),
+            'size'            => trans('torrent.size'),
         ];
     }
 
@@ -74,8 +74,8 @@ class TorrentFacetedRepository
     public function direction()
     {
         return [
-            'desc' => 'Descending',
-            'asc'  => 'Ascending',
+            'desc' => trans('common.descending'),
+            'asc'  => trans('common.ascending'),
         ];
     }
 }

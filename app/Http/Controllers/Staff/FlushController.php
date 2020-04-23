@@ -2,46 +2,50 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Mr.G
  */
 
 namespace App\Http\Controllers\Staff;
 
-use Carbon\Carbon;
-use App\Models\Peer;
-use App\Models\History;
-use Brian2694\Toastr\Toastr;
+use App\Events\MessageDeleted;
 use App\Http\Controllers\Controller;
+use App\Models\History;
+use App\Models\Message;
+use App\Models\Peer;
+use App\Repositories\ChatRepository;
+use Carbon\Carbon;
 
 class FlushController extends Controller
 {
     /**
-     * @var Toastr
+     * @var ChatRepository
      */
-    private $toastr;
+    private $chat;
 
     /**
-     * FlushController Constructor.
+     * ChatController Constructor.
      *
-     * @param Toastr $toastr
+     * @param ChatRepository $chat
      */
-    public function __construct(Toastr $toastr)
+    public function __construct(ChatRepository $chat)
     {
-        $this->toastr = $toastr;
+        $this->chat = $chat;
     }
 
     /**
-     * Delete All Old Peers From Database.
+     * Flsuh All Old Peers From Database.
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteOldPeers()
+    public function peers()
     {
         $current = new Carbon();
         $peers = Peer::select(['id', 'info_hash', 'user_id', 'updated_at'])->where('updated_at', '<', $current->copy()->subHours(2)->toDateTimeString())->get();
@@ -55,7 +59,29 @@ class FlushController extends Controller
             $peer->delete();
         }
 
-        return redirect('staff_dashboard')
-            ->with($this->toastr->success('Ghost Peers Have Been Flushed', 'Yay!', ['options']));
+        return redirect()->route('staff.dashboard.index')
+            ->withSuccess('Ghost Peers Have Been Flushed');
+    }
+
+    /**
+     * Flush All Chat Messages.
+     *
+     * @throws \Exception
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function chat()
+    {
+        foreach (Message::all() as $message) {
+            broadcast(new MessageDeleted($message));
+            $message->delete();
+        }
+
+        $this->chat->systemMessage(
+            'Chatbox Has Been Flushed! :broom:'
+        );
+
+        return redirect()->route('staff.dashboard.index')
+            ->withSuccess('Chatbox Has Been Flushed');
     }
 }

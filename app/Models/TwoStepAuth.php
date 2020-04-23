@@ -2,21 +2,51 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\TwoStepAuth.
+ *
+ * @property int $id
+ * @property int $userId
+ * @property string|null $authCode
+ * @property int $authCount
+ * @property bool $authStatus
+ * @property \Illuminate\Support\Carbon|null $authDate
+ * @property \Illuminate\Support\Carbon|null $requestDate
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereAuthCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereAuthCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereAuthDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereAuthStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereRequestDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TwoStepAuth whereUserId($value)
+ * @mixin \Eloquent
+ */
 class TwoStepAuth extends Model
 {
+    use Auditable;
+
     /**
      * The Database Table Used By The Model.
      *
@@ -89,10 +119,10 @@ class TwoStepAuth extends Model
     {
         return array_merge(
             [
-            'userId'     => 'required|integer',
-            'authCode'   => 'required|string|max:4|min:4',
-            'authCount'  => 'required|integer',
-            'authStatus' => 'required|boolean',
+                'userId'     => 'required|integer',
+                'authCode'   => 'required|string|max:4|min:4',
+                'authCount'  => 'required|integer',
+                'authStatus' => 'required|boolean',
             ],
             $merge
         );

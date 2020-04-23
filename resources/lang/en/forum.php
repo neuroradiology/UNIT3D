@@ -1,4 +1,15 @@
 <?php
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
+ */
 
 return [
     'action'             => 'Action',
@@ -6,7 +17,7 @@ return [
     'approved'           => 'Approved',
     'author'             => 'Author',
     'bug'                => 'Bug',
-    'category-quick-search' => 'Topic name quick search (within category)',
+    'category-quick-search' => 'Topic Name Quick Search (within category)',
     'close-topic'        => 'Lock Topic',
     'closed'             => 'Closed',
     'create-new-topic'   => 'Create New Topic',
@@ -39,7 +50,7 @@ return [
     'permalink'          => 'Permalink',
     'pin'                => 'Pin',
     'post'               => 'Post',
-    'post-quick-search'  => 'Post body quick search',
+    'post-quick-search'  => 'Post Body Quick Search',
     'posts'              => 'Posts',
     'quote'              => 'Quote',
     'read-topic'         => 'Read The Topic',
@@ -49,12 +60,14 @@ return [
     'state'              => 'State',
     'stats'              => 'Stats',
     'subscribed'         => 'Subscribed',
-    'subscription-quick-search' => 'Topic name quick search (within subscriptions)',
+    'subscription-quick-search' => 'Topic Name Quick Search (within subscriptions)',
     'suggestion'         => 'Suggestion',
+    'tip-post-total'     => 'This Post Has Been Tipped A Total Of',
+    'tip-this-post'      => 'Tip This Poster',
     'topic'              => 'Topic',
     'topic-closed'       => 'This Topic is Closed',
-    'topic-name'         => 'Topic name',
-    'topic-quick-search' => 'Topic name quick search',
+    'topic-name'         => 'Topic Name',
+    'topic-quick-search' => 'Topic Name Quick Search',
     'topic-title'        => 'Title of This Topic',
     'topics'             => 'Topics',
     'unpin'              => 'Unpin',

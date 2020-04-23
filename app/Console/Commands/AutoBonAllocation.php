@@ -2,20 +2,19 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Mr.G
  */
 
 namespace App\Console\Commands;
 
-use App\Models\Peer;
+use App\Helpers\ByteUnits;
 use App\Models\User;
-use App\Models\BonTransactions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +39,7 @@ class AutoBonAllocation extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(ByteUnits $byteUnits)
     {
         $dying_torrent = DB::table('peers')
             ->select(DB::raw('count(DISTINCT(peers.info_hash)) as value'), 'peers.user_id')
@@ -78,7 +77,7 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(peers.info_hash)) as value'), 'peers.user_id')
             ->join('torrents', 'torrents.id', 'peers.torrent_id')
             ->where('peers.seeder', 1)
-            ->where('torrents.size', '>=', 1073741824 * 100)
+            ->where('torrents.size', '>=', $byteUnits->bytesFromUnit('100GiB'))
             ->whereRaw('date_sub(peers.created_at,interval 30 minute) < now()')
             ->groupBy('peers.user_id')
             ->get()
@@ -88,8 +87,8 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(peers.info_hash)) as value'), 'peers.user_id')
             ->join('torrents', 'torrents.id', 'peers.torrent_id')
             ->where('peers.seeder', 1)
-            ->where('torrents.size', '>=', 1073741824 * 25)
-            ->where('torrents.size', '<', 1073741824 * 100)
+            ->where('torrents.size', '>=', $byteUnits->bytesFromUnit('25GiB'))
+            ->where('torrents.size', '<', $byteUnits->bytesFromUnit('100GiB'))
             ->whereRaw('date_sub(peers.created_at,interval 30 minute) < now()')
             ->groupBy('peers.user_id')
             ->get()
@@ -99,8 +98,8 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(peers.info_hash)) as value'), 'peers.user_id')
             ->join('torrents', 'torrents.id', 'peers.torrent_id')
             ->where('peers.seeder', 1)
-            ->where('torrents.size', '>=', 1073741824)
-            ->where('torrents.size', '<', 1073741824 * 25)
+            ->where('torrents.size', '>=', $byteUnits->bytesFromUnit('1GiB'))
+            ->where('torrents.size', '<', $byteUnits->bytesFromUnit('25GiB'))
             ->whereRaw('date_sub(peers.created_at,interval 30 minute) < now()')
             ->groupBy('peers.user_id')
             ->get()
@@ -110,8 +109,8 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(history.info_hash)) as value'), 'history.user_id')
             ->join('torrents', 'torrents.info_hash', 'history.info_hash')
             ->where('history.active', 1)
-            ->where('history.seedtime', '>=', 2592000)
-            ->where('history.seedtime', '<', 2592000 * 2)
+            ->where('history.seedtime', '>=', 2_592_000)
+            ->where('history.seedtime', '<', 2_592_000 * 2)
             ->groupBy('history.user_id')
             ->get()
             ->toArray();
@@ -120,8 +119,8 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(history.info_hash)) as value'), 'history.user_id')
             ->join('torrents', 'torrents.info_hash', 'history.info_hash')
             ->where('history.active', 1)
-            ->where('history.seedtime', '>=', 2592000 * 2)
-            ->where('history.seedtime', '<', 2592000 * 3)
+            ->where('history.seedtime', '>=', 2_592_000 * 2)
+            ->where('history.seedtime', '<', 2_592_000 * 3)
             ->groupBy('history.user_id')
             ->get()
             ->toArray();
@@ -130,8 +129,8 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(history.info_hash)) as value'), 'history.user_id')
             ->join('torrents', 'torrents.info_hash', 'history.info_hash')
             ->where('history.active', 1)
-            ->where('history.seedtime', '>=', 2592000 * 3)
-            ->where('history.seedtime', '<', 2592000 * 6)
+            ->where('history.seedtime', '>=', 2_592_000 * 3)
+            ->where('history.seedtime', '<', 2_592_000 * 6)
             ->groupBy('history.user_id')
             ->get()
             ->toArray();
@@ -140,8 +139,8 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(history.info_hash)) as value'), 'history.user_id')
             ->join('torrents', 'torrents.info_hash', 'history.info_hash')
             ->where('history.active', 1)
-            ->where('history.seedtime', '>=', 2592000 * 6)
-            ->where('history.seedtime', '<', 2592000 * 12)
+            ->where('history.seedtime', '>=', 2_592_000 * 6)
+            ->where('history.seedtime', '<', 2_592_000 * 12)
             ->groupBy('history.user_id')
             ->get()
             ->toArray();
@@ -150,7 +149,7 @@ class AutoBonAllocation extends Command
             ->select(DB::raw('count(DISTINCT(history.info_hash)) as value'), 'history.user_id')
             ->join('torrents', 'torrents.info_hash', 'history.info_hash')
             ->where('history.active', 1)
-            ->where('history.seedtime', '>=', 2592000 * 12)
+            ->where('history.seedtime', '>=', 2_592_000 * 12)
             ->groupBy('history.user_id')
             ->get()
             ->toArray();
@@ -264,5 +263,6 @@ class AutoBonAllocation extends Command
             $user->seedbonus += $value;
             $user->save();
         }
+        $this->comment('Automated BON Allocation Command Complete');
     }
 }

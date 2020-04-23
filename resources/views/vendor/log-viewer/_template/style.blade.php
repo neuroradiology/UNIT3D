@@ -18,7 +18,7 @@
 
     .sub-header {
         padding-bottom: 10px;
-        border-bottom: 1px solid #EEE;
+        border-bottom: 1px solid #eeeeee;
     }
 
     .navbar-inverse {
@@ -66,7 +66,7 @@
     }
 
     footer.main-footer i.fa.fa-heart {
-        color: #C62828;
+        color: #c62828;
     }
 
     .pagination {
@@ -87,9 +87,9 @@
 
     .stack-content {
         padding: 8px;
-        background-color: #F6F6F6;
-        border-top: 1px solid #D1D1D1;
-        color: #AE0E0E;
+        background-color: #f6f6f6;
+        border-top: 1px solid #d1d1d1;
+        color: #ae0e0e;
         font-family: consolas,sans-serif;
         font-size: 12px;
     }
@@ -99,7 +99,7 @@
         padding: 0;
         margin-bottom: 15px;
         min-height: 70px;
-        background: #fff;
+        background: #ffffff;
         width: 100%;
         box-shadow: 0 1px 1px rgba(0,0,0,0.1);
         border-radius: 2px;
@@ -148,14 +148,12 @@
     }
 
     .info-box.level .progress .progress-bar {
-        background: #fff;
+        background: #ffffff;
     }
 
     .info-box.level-empty {
         opacity: .6;
         -webkit-filter: grayscale(1);
-           -moz-filter: grayscale(1);
-            -ms-filter: grayscale(1);
                 filter: grayscale(1);
         -webkit-transition: all 0.2s ease-in-out;
            -moz-transition: all 0.2s ease-in-out;
@@ -170,8 +168,6 @@
     .info-box.level-empty:hover {
         opacity: 1;
         -webkit-filter: grayscale(0);
-           -moz-filter: grayscale(0);
-            -ms-filter: grayscale(0);
                 filter: grayscale(0);
     }
 
@@ -202,7 +198,7 @@
     .info-box.level-notice,
     .info-box.level-info,
     .info-box.level-debug {
-        color: #FFF;
+        color: #ffffff;
     }
 
     .label-env {
@@ -250,6 +246,6 @@
     }
 
     .badge.label-env, .label.label-env {
-        background-color: #6A1B9A;
+        background-color: #6a1b9a;
     }
 </style>

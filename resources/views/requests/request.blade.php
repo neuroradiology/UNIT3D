@@ -1,7 +1,7 @@
 @extends('layout.default')
 
 @section('title')
-    <title>Request - {{ config('other.title') }}</title>
+    <title>Request - {{ config('other.title') }} - {{ $torrentRequest->name }}</title>
 @endsection
 
 @section('breadcrumb')
@@ -34,7 +34,7 @@
         @else
             <h1 class="title h2">
                 {{ $torrentRequest->name }}
-                <span class="text-green">@lang('request.for') <i class="{{ config('other.font-awesome') }} fa-star text-gold">
+                <span class="text-green">@lang('request.for') <i class="{{ config('other.font-awesome') }} fa-coins text-gold">
             </i> <strong>{{ $torrentRequest->bounty }}</strong> @lang('bon.bon')</span>
             </h1>
             <div class="block">
@@ -64,128 +64,15 @@
                         </div>
                     </div>
                 </div>
-                @if ($torrentRequest->category->meta == 1)
-                    <div class="movie-wrapper">
-                        <div class="movie-backdrop" style="background-image: url({{ $movie->backdrop ?? 'https://via.placeholder.com/1400x800' }});">
-                            <div class="tags">
-                                {{ $torrentRequest->category->name }}
-                            </div>
-                        </div>
-                        <div class="movie-overlay"></div>
-                        <div class="container movie-container">
-                            <div class="row movie-row ">
-                                <div class="col-xs-12 col-sm-8 col-md-8 col-sm-push-4 col-md-push-3 movie-heading-box">
-                                    <h1 class="movie-heading">
-                                        @if ($movie->title)
-                                            <span class="text-bold">{{ $movie->title }}</span><span
-                                                    class="text-bold"><em> {{ $movie->releaseYear }}</em></span>
-                                        @else
-                                            <span class="text-bold">Sorry Not Meta Found</span>
-                                        @endif
-                                            @if ($movie->imdbRating || $movie->tmdbRating)
-                                                <span class="badge-user text-bold text-gold">@lang('torrent.rating'):
-                    <span class="movie-rating-stars">
-                      <i class="{{ config('other.font-awesome') }} fa-star"></i>
-                    </span>
-                                                    @if ($user->ratings == 1)
-                                                        {{ $movie->imdbRating }}/10({{ $movie->imdbVotes }} @lang('torrent.votes')
-                                                        )
-                                                    @else
-                                                        {{ $movie->tmdbRating }}/10({{ $movie->tmdbVotes }} @lang('torrent.votes')
-                                                        )
-                                                    @endif
-                 </span>
-                                            @endif
-                                    </h1>
-                                    <br>
-                                    <span class="movie-overview">
-                            {{ $movie->plot }}
-                        </span>
-                                    <ul class="movie-details">
-                                        <li>
-                                            @if ($movie->genres)
-                                                @foreach ($movie->genres as $genre)
-                                                    <span class="badge-user text-bold text-green">{{ $genre }}</span>
-                                                @endforeach
-                                            @endif
-                                                @if ($movie->rated )
-                                            <span class="badge-user text-bold text-orange">@lang('torrent.rated')
-                                                : {{ $movie->rated }} </span>
-                                                @endif
-                                                @if ($movie->runtime )
-                                            <span class="badge-user text-bold text-orange">@lang('torrent.runtime')
-                                                : {{ $movie->runtime }} @lang('common.minute')@lang('common.plural-suffix')</span>
-                                                    @endif
-                                        </li>
-                                        <li>
-                                            @if ($torrentRequest->imdb != 0 && $torrentRequest->imdb != null)
-                  <span class="badge-user text-bold text-orange">
-                    <a href="https://www.imdb.com/title/tt{{ $torrentRequest->imdb }}" title="IMDB"
-                       target="_blank">IMDB: {{ $torrentRequest->imdb }}</a>
-                  </span>
-                                            @endif
-                                                @if ($torrentRequest->category_id == "2" && $torrentRequest->tmdb != 0 && $torrentRequest->tmdb != null)
-                                                <span class="badge-user text-bold text-orange">
-                      <a href="https://www.themoviedb.org/tv/{{ $torrentRequest->tmdb }}"
-                         title="TheMovieDatabase" target="_blank">TMDB: {{ $torrentRequest->tmdb }}</a>
-                    </span>
-                                                @elseif ($torrentRequest->tmdb != 0 && $torrentRequest->tmdb != null)
-                                                <span class="badge-user text-bold text-orange">
-                      <a href="https://www.themoviedb.org/movie/{{ $torrentRequest->tmdb }}"
-                         title="TheMovieDatabase" target="_blank">TMDB: {{ $torrentRequest->tmdb }}</a>
-                    </span>
-                                            @endif
-                                            @if ($torrentRequest->mal != 0 && $torrentRequest->mal != null)
-                                                <span class="badge-user text-bold text-pink">
-                      <a href="https://myanimelist.net/anime/{{ $torrentRequest->mal }}"
-                         title="MAL" target="_blank">MAL: {{ $torrentRequest->mal }}</a>
-                    </span>
-                                            @endif
-                                            @if ($torrentRequest->category_id == "2" && $torrentRequest->tvdb != 0 && $torrentRequest->tvdb != null)
-                                                <span class="badge-user text-bold text-pink">
-                      <a
-                         href="https://www.thetvdb.com/?tab=series&id={{ $torrentRequest->tvdb }}"
-                         title="TVDB" target="_blank">TVDB: {{ $torrentRequest->tvdb }}</a>
-                    </span>
-                                            @endif
-                                            @if ($movie->videoTrailer != '')
-                                                <span onclick="showTrailer()" style="cursor: pointer;"
-                                                      class="badge-user text-bold">
-                            <a class="text-pink" title="View Trailer">@lang('torrent.view-trailer') <i
-                                        class="{{ config('other.font-awesome') }} fa-external-link"></i></a>
-                        </span>
-                                            @endif
-                                        </li>
-                                        <br>
-                                        <li>
-                                            <div class="row cast-list">
-                                                @if ($movie->actors)
-                                                    @php $client = new \App\Services\MovieScrapper(config('api-keys.tmdb'), config('api-keys.tvdb'), config('api-keys.omdb')); @endphp
-                                                    @foreach (array_slice($movie->actors, 0,6) as $actor)
-                                                        @php $person = $client->person($actor->tmdb); @endphp
-                                                        <div class="col-xs-4 col-md-2 text-center">
-                                                            <img class="img-people" src="{{ $person->photo }}">
-                                                            <a
-                                                               href="https://www.themoviedb.org/person/{{ $actor->tmdb }}"
-                                                               title="TheMovieDatabase" target="_blank">
-                                                                <span class="badge-user"
-                                                                      style="white-space:normal;"><strong>{{ $actor->name }}</strong></span>
-                                                            </a>
-                                                        </div>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
 
-                                <div class="col-xs-12 col-sm-4 col-md-3 col-sm-pull-8 col-md-pull-8">
-                                    <img src="{{ $movie->poster ?? 'https://via.placeholder.com/600x900' }}" class="movie-poster img-responsive hidden-xs">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                @if ($torrentRequest->category->movie_meta || $torrentRequest->category->tv_meta)
+                    @include('requests.partials.movie_tv_meta')
                 @endif
+
+                @if ($torrentRequest->category->game_meta)
+                    @include('requests.partials.game_meta')
+                @endif
+
                 <div class="table-responsive">
                     <table class="table table-condensed table-bordered table-striped">
                         <tbody>
@@ -220,7 +107,7 @@
                                 <strong>@lang('bon.bon')</strong>
                             </td>
                             <td>
-                                <i class="{{ config('other.font-awesome') }} fa-star text-gold">
+                                <i class="{{ config('other.font-awesome') }} fa-coins text-gold">
                                 </i>
                                 <strong>{{ $torrentRequest->bounty }}</strong> @lang('bon.bon') {{ strtolower(trans('request.reward-from')) }}
                                 <strong>{{ $torrentRequest->requestBounty->count() }}</strong> {{ strtolower(trans('request.voters')) }}
@@ -245,14 +132,14 @@
                             <td>
                                 @if ($torrentRequest->anon == 0)
                                 <span class="badge-user">
-                                    <a href="{{ route('profile', ['username' => $torrentRequest->user->username, 'id' => $torrentRequest->user->id]) }}">
+                                    <a href="{{ route('users.show', ['username' => $torrentRequest->user->username]) }}">
                                         {{ $torrentRequest->user->username }}
                                     </a>
                                 </span>
                                 @else
                                 <span class="badge-user">{{ strtoupper(trans('common.anonymous')) }}
                                 @if ($user->group->is_modo || $torrentRequest->user->username == $user->username)
-                                    <a href="{{ route('profile', ['username' => $torrentRequest->user->username, 'id' => $torrentRequest->user->id]) }}">
+                                    <a href="{{ route('users.show', ['username' => $torrentRequest->user->username]) }}">
                                         ({{ $torrentRequest->user->username }})
                                     </a>
                                 @endif
@@ -270,12 +157,14 @@
                             <td>
                                 @if ($torrentRequest->claimed == null && $torrentRequest->filled_hash == null)
                                     <button class="btn btn-md btn-info btn-vote-request" data-toggle="modal"
-                                            data-target="#claim"><i class="{{ config('other.font-awesome') }} fa-suitcase">
+                                            data-target="#claim"><i class="{{ config('other.font-awesome') }} fa-hand-paper">
                                         </i> @lang('request.claim')
                                     </button>
-                                    <a href="{{ route('upload_form', ['title' => $movie->title, 'imdb' => $movie->imdb, 'tmdb' => $movie->tmdb]) }}"
-                                       class="btn btn-md btn-success"> @lang('common.upload') {{ $movie->title ?? '' }}
-                                    </a>
+                                    @if ($torrentRequest->category->movie_meta || $torrentRequest->category->tv_meta)
+                                        <a href="{{ route('upload_form', ['title' => $meta->title ?? ' ', 'imdb' => $meta->imdb ?? 0, 'tmdb' => $meta->tmdb ?? 0]) }}"
+                                           class="btn btn-xs btn-success"> @lang('common.upload') {{ $meta->title ?? ''}}
+                                        </a>
+                                    @endif
                                 @elseif ($torrentRequest->filled_hash != null && $torrentRequest->approved_by == null)
                                     <button class="btn btn-xs btn-warning" disabled><i
                                                 class="{{ config('other.font-awesome') }} fa-question-circle"></i>@lang('request.pending')
@@ -286,7 +175,7 @@
                                 @else
                                     @if ($torrentRequestClaim->anon == 0)
                                     <span class="badge-user">
-                                        <a href="{{ route('profile', ['username' => $torrentRequestClaim->username, 'id' => $torrentRequestClaim->user_id]) }}">
+                                        <a href="{{ route('users.show', ['username' => $torrentRequestClaim->username]) }}">
                                             {{ $torrentRequestClaim->username }}
                                         </a>
                                     </span>
@@ -310,8 +199,8 @@
                                                 <i class="{{ config('other.font-awesome') }} fa-times"></i> @lang('request.unclaim')
                                             </span>
                                         </a>
-                                        <a href="{{ route('upload_form', ['title' => $movie->title, 'imdb' => $movie->imdb, 'tmdb' => $movie->tmdb]) }}"
-                                           class="btn btn-xs btn-success"> @lang('common.upload') {{ $movie->title ?? ''}}
+                                        <a href="{{ route('upload_form', ['title' => $meta->title ?? ' ', 'imdb' => $meta->imdb ?? 0, 'tmdb' => $meta->tmdb ?? 0]) }}"
+                                           class="btn btn-xs btn-success"> @lang('common.upload') {{ $meta->title ?? ''}}
                                         </a>
                                     @endif
                                 @endif
@@ -336,14 +225,14 @@
                                 <td>
                                     @if ($torrentRequest->filled_anon == 0)
                                     <span class="badge-user">
-                                        <a href="{{ route('profile', ['username' => $torrentRequest->FillUser->username, 'id' => $torrentRequest->FillUser->id ]) }}">
+                                        <a href="{{ route('users.show', ['username' => $torrentRequest->FillUser->username]) }}">
                                             {{ $torrentRequest->FillUser->username }}
                                         </a>
                                     </span>
                                     @else
                                     <span class="badge-user">{{ strtoupper(trans('common.anonymous')) }}
                                         @if ($user->group->is_modo || $torrentRequest->FillUser->username == $user->username)
-                                            <a href="{{ route('profile', ['username' => $torrentRequest->FillUser->username, 'id' => $torrentRequest->FillUser->id ]) }}">
+                                            <a href="{{ route('users.show', ['username' => $torrentRequest->FillUser->username]) }}">
                                                 ({{ $torrentRequest->FillUser->username }})
                                             </a>
                                         @endif
@@ -359,7 +248,7 @@
                                     <strong>@lang('torrent.torrent')</strong>
                                 </td>
                                 <td>
-                                    <a href="{{ route('torrent', ['slug' => $torrentRequest->torrent->slug, 'id' => $torrentRequest->torrent->id]) }}">{{ $torrentRequest->torrent->name }}</a>
+                                    <a href="{{ route('torrent', ['id' => $torrentRequest->torrent->id]) }}">{{ $torrentRequest->torrent->name }}</a>
                                 </td>
                             </tr>
                         @endif
@@ -372,7 +261,7 @@
                                 <td>
                                     @if ($torrentRequest->filled_anon == 0)
                                     <span class="badge-user">
-                                        <a href="{{ route('profile', ['username' => $torrentRequest->FillUser->username, 'id' => $torrentRequest->FillUser->id ]) }}">
+                                        <a href="{{ route('users.show', ['username' => $torrentRequest->FillUser->username]) }}">
                                             {{ $torrentRequest->FillUser->username }}
                                         </a>
                                     </span>
@@ -403,7 +292,7 @@
                                     <strong>@lang('torrent.torrent')</strong>
                                 </td>
                                 <td>
-                                    <a href="{{ route('torrent', ['slug' => $torrentRequest->torrent->slug, 'id' => $torrentRequest->torrent->id]) }}">{{ $torrentRequest->torrent->name }}</a>
+                                    <a href="{{ route('torrent', ['id' => $torrentRequest->torrent->id]) }}">{{ $torrentRequest->torrent->name }}</a>
                                 </td>
                             </tr>
                         @endif
@@ -437,14 +326,14 @@
                                         <td>
                                             @if ($voter->anon == 0)
                                             <span class="badge-user">
-                                                <a href="{{ route('profile', ['username' => $voter->user->username, 'id' => $voter->user->id ]) }}">
+                                                <a href="{{ route('users.show', ['username' => $voter->user->username]) }}">
                                                     {{ $voter->user->username }}
                                                 </a>
                                             </span>
                                             @else
                                             <span class="badge-user">{{ strtoupper(trans('common.anonymous')) }}
                                                 @if ($user->group->is_modo || $voter->user->username == $user->username)
-                                                    <a href="{{ route('profile', ['username' => $voter->user->username, 'id' => $voter->user->id ]) }}">
+                                                    <a href="{{ route('users.show', ['username' => $voter->user->username]) }}">
                                                         ({{ $voter->user->username }})
                                                     </a>
                                                 @endif
@@ -466,7 +355,6 @@
                 </div>
             </div>
             <div class="block" id="comments">
-                <!-- Comments -->
                 <div class="clearfix"></div>
                 <div class="row ">
                     <div class="col-md-12 col-sm-12">
@@ -484,18 +372,18 @@
                                                         class="{{ config('other.font-awesome') }} fa-frown"></i> @lang('common.no-comments')!
                                             </h4></div>
                                     @else @foreach ($comments as $comment)
-                                        <li class="media" style="border-left: 5px solid #01BC8C">
+                                        <li class="media" style="border-left: 5px solid #01bc8c;">
                                             <div class="media-body">
                                                 @if ($comment->anon == 1)
-                                                    <a href="#" class="pull-left" style="padding-right: 10px">
+                                                    <a href="#" class="pull-left" style="padding-right: 10px;">
                                                         <img src="{{ url('img/profile.png') }}"
                                                              alt="{{ $comment->user->username }}" class="img-avatar-48">
                                                         <strong>{{ strtoupper(trans('common.anonymous')) }}</strong></a> @if (auth()->user()->id == $comment->user->id || auth()->user()->group->is_modo)
-                                                        <a href="{{ route('profile', ['username' => $comment->user->username, 'id' => $comment->user->id]) }}" style="color:{{ $comment->user->group->color }}">(<span><i class="{{ $comment->user->group->icon }}"></i> {{ $comment->user->username }}</span>)</a>
+                                                        <a href="{{ route('users.show', ['username' => $comment->user->username]) }}" style="color:{{ $comment->user->group->color }};">(<span><i class="{{ $comment->user->group->icon }}"></i> {{ $comment->user->username }}</span>)</a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('profile', ['username' => $comment->user->username, 'id' => $comment->user->id]) }}"
-                                                       class="pull-left" style="padding-right: 10px">
+                                                    <a href="{{ route('users.show', ['username' => $comment->user->username]) }}"
+                                                       class="pull-left" style="padding-right: 10px;">
                                                         @if ($comment->user->image != null)
                                                             <img src="{{ url('files/img/' . $comment->user->image) }}"
                                                                  alt="{{ $comment->user->username }}"
@@ -505,7 +393,7 @@
                                                              alt="{{ $comment->user->username }}"
                                                              class="img-avatar-48"></a>
                                                     @endif
-                                                    <strong><a href="{{ route('profile', ['username' => $comment->user->username, 'id' => $comment->user->id]) }}" style="color:{{ $comment->user->group->color }}"><span><i class="{{ $comment->user->group->icon }}"></i> {{ $comment->user->username }}</span></a></strong>
+                                                    <strong><a href="{{ route('users.show', ['username' => $comment->user->username]) }}" style="color:{{ $comment->user->group->color }};"><span><i class="{{ $comment->user->group->icon }}"></i> {{ $comment->user->username }}</span></a></strong>
                                                 @endif
                                                 <span class="text-muted"><small><em>{{ $comment->created_at->toDayDateTimeString() }} ({{ $comment->created_at->diffForHumans() }})</em></small></span>
                                                 @if ($comment->user_id == auth()->id() || auth()->user()->group->is_modo)
@@ -531,34 +419,34 @@
                             </div>
                         </div>
                     </div>
-                    <!-- /Comments -->
                     <div class="clearfix"></div>
                     <div class="col-md-12 home-pagination">
                         <div class="text-center">{{ $comments->links() }}</div>
                     </div>
                     <br>
 
-                    <!-- Add comment -->
                     <div class="col-md-12">
                         <form role="form" method="POST"
                               action="{{ route('comment_request',['id' => $torrentRequest->id]) }}">
                             @csrf
                             <div class="form-group">
                                 <label for="content">@lang('common.your-comment'):</label><span
-                                        class="badge-extra">@lang('common.type')
-                                    <strong>:</strong> {{ strtolower(trans('common.for')) }} emoji</span> <span
+                                        class="badge-extra">@lang('common.type-verb')
+                                    <strong>":"</strong> {{ strtolower(trans('common.for')) }} emoji</span> <span
                                         class="badge-extra">BBCode {{ strtolower(trans('common.is-allowed')) }}</span>
-                                <textarea id="content" name="content" cols="30" rows="5"
-                                          class="form-control"></textarea>
+                                <textarea id="content" name="content" cols="30" rows="5" class="form-control"></textarea>
                             </div>
                             <button type="submit" class="btn btn-danger">@lang('common.submit')</button>
                             <label class="radio-inline"><strong>@lang('common.anonymous') {{ strtolower(trans('common.comment')) }}
                                     :</strong></label>
-                            <input type="radio" value="1" name="anonymous"> @lang('common.yes')
-                            <input type="radio" value="0" checked="checked" name="anonymous"> @lang('common.no')
+                            <label>
+                                <input type="radio" value="1" name="anonymous">
+                            </label> @lang('common.yes')
+                            <label>
+                                <input type="radio" value="0" checked="checked" name="anonymous">
+                            </label> @lang('common.no')
                         </form>
                     </div>
-                    <!-- /Add comment -->
                 </div>
             </div>
         </div>

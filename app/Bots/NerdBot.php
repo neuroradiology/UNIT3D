@@ -2,47 +2,56 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     singularity43
  */
 
 namespace App\Bots;
 
-use Carbon\Carbon;
+use App\Events\Chatter;
+use App\Http\Resources\UserAudibleResource;
+use App\Http\Resources\UserEchoResource;
 use App\Models\Ban;
 use App\Models\Bot;
-use App\Models\Peer;
-use App\Models\User;
-use App\Events\Chatter;
-use App\Models\Torrent;
-use App\Models\Warning;
-use App\Models\UserEcho;
-use App\Models\UserAudible;
 use App\Models\BotTransaction;
+use App\Models\Peer;
+use App\Models\Torrent;
+use App\Models\User;
+use App\Models\UserAudible;
+use App\Models\UserEcho;
+use App\Models\Warning;
 use App\Repositories\ChatRepository;
-use App\Http\Resources\UserEchoResource;
-use App\Http\Resources\UserAudibleResource;
+use Carbon\Carbon;
 
 class NerdBot
 {
     private $bot;
+
     private $chat;
+
     private $target;
+
     private $type;
+
     private $message;
+
     private $targeted;
+
     private $log;
+
     private $expiresAt;
+
     private $current;
 
     /**
      * NerdBot Constructor.
      *
-     * @param Toastr $toastr
+     * @param ChatRepository $chat
      */
     public function __construct(ChatRepository $chat)
     {
@@ -55,6 +64,10 @@ class NerdBot
 
     /**
      * Replace Vars.
+     *
+     * @param $output
+     *
+     * @return mixed
      */
     public function replaceVars($output)
     {
@@ -74,6 +87,12 @@ class NerdBot
 
     /**
      * Get Banker.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getBanker($duration = 'default')
     {
@@ -83,11 +102,17 @@ class NerdBot
             cache()->put('nerdbot-banker', $banker, $this->expiresAt);
         }
 
-        return "Currently [url=/{$banker->slug}.{$banker->id}]{$banker->username}[/url] Is The Top BON Holder On ".config('other.title').'!';
+        return sprintf('Currently [url=/users/%s]%s[/url] Is The Top BON Holder On ', $banker->username, $banker->username).config('other.title').'!';
     }
 
     /**
      * Get Snatched.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getSnatched($duration = 'default')
     {
@@ -97,11 +122,17 @@ class NerdBot
             cache()->put('nerdbot-snatched', $snatched, $this->expiresAt);
         }
 
-        return "Currently [url=/torrents/{$snatched->slug}.{$snatched->id}]{$snatched->name}[/url] Is The Most Snatched Torrent On ".config('other.title').'!';
+        return sprintf('Currently [url=/torrents/%s]%s[/url] Is The Most Snatched Torrent On ', $snatched->id, $snatched->name).config('other.title').'!';
     }
 
     /**
      * Get Leeched.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getLeeched($duration = 'default')
     {
@@ -111,11 +142,17 @@ class NerdBot
             cache()->put('nerdbot-leeched', $leeched, $this->expiresAt);
         }
 
-        return "Currently [url=/torrents/{$leeched->slug}.{$leeched->id}]{$leeched->name}[/url] Is The Most Leeched Torrent On ".config('other.title').'!';
+        return sprintf('Currently [url=/torrents/%s]%s[/url] Is The Most Leeched Torrent On ', $leeched->id, $leeched->name).config('other.title').'!';
     }
 
     /**
      * Get Seeded.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getSeeded($duration = 'default')
     {
@@ -125,11 +162,17 @@ class NerdBot
             cache()->put('nerdbot-seeded', $seeded, $this->expiresAt);
         }
 
-        return "Currently [url=/torrents/{$seeded->slug}.{$seeded->id}]{$seeded->name}[/url] Is The Most Seeded Torrent On ".config('other.title').'!';
+        return sprintf('Currently [url=/torrents/%s]%s[/url] Is The Most Seeded Torrent On ', $seeded->id, $seeded->name).config('other.title').'!';
     }
 
     /**
      * Get FL.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getFreeleech($duration = 'default')
     {
@@ -139,11 +182,17 @@ class NerdBot
             cache()->put('nerdbot-fl', $fl, $this->expiresAt);
         }
 
-        return "There Are Currently {$fl} Freeleech Torrents On ".config('other.title').'!';
+        return sprintf('There Are Currently %s Freeleech Torrents On ', $fl).config('other.title').'!';
     }
 
     /**
      * Get DU.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getDoubleUpload($duration = 'default')
     {
@@ -153,11 +202,17 @@ class NerdBot
             cache()->put('nerdbot-doubleup', $du, $this->expiresAt);
         }
 
-        return "There Are Currently {$du} Double Upload Torrents On ".config('other.title').'!';
+        return sprintf('There Are Currently %s Double Upload Torrents On ', $du).config('other.title').'!';
     }
 
     /**
      * Get Peers.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getPeers($duration = 'default')
     {
@@ -167,11 +222,17 @@ class NerdBot
             cache()->put('nerdbot-peers', $peers, $this->expiresAt);
         }
 
-        return "Currently There Are {$peers} Peers On ".config('other.title').'!';
+        return sprintf('Currently There Are %s Peers On ', $peers).config('other.title').'!';
     }
 
     /**
      * Get Bans.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getBans($duration = 'default')
     {
@@ -181,11 +242,17 @@ class NerdBot
             cache()->put('nerdbot-bans', $bans, $this->expiresAt);
         }
 
-        return "In The Last 24 Hours {$bans} Users Have Been Banned From ".config('other.title').'!';
+        return sprintf('In The Last 24 Hours %s Users Have Been Banned From ', $bans).config('other.title').'!';
     }
 
     /**
      * Get Warnings.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getWarnings($duration = 'default')
     {
@@ -195,11 +262,17 @@ class NerdBot
             cache()->put('nerdbot-warnings', $warnings, $this->expiresAt);
         }
 
-        return "In The Last 24 Hours {$warnings} Hit and Run Warnings Have Been Issued On ".config('other.title').'!';
+        return sprintf('In The Last 24 Hours %s Hit and Run Warnings Have Been Issued On ', $warnings).config('other.title').'!';
     }
 
     /**
      * Get Uploads.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getUploads($duration = 'default')
     {
@@ -209,11 +282,17 @@ class NerdBot
             cache()->put('nerdbot-uploads', $uploads, $this->expiresAt);
         }
 
-        return "In The Last 24 Hours {$uploads} Torrents Have Been Uploaded To ".config('other.title').'!';
+        return sprintf('In The Last 24 Hours %s Torrents Have Been Uploaded To ', $uploads).config('other.title').'!';
     }
 
     /**
      * Get Logins.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getLogins($duration = 'default')
     {
@@ -223,25 +302,37 @@ class NerdBot
             cache()->put('nerdbot-logins', $logins, $this->expiresAt);
         }
 
-        return "In The Last 24 Hours {$logins} Unique Users Have Logged Into ".config('other.title').'!';
+        return sprintf('In The Last 24 Hours %s Unique Users Have Logged Into ', $logins).config('other.title').'!';
     }
 
     /**
      * Get Registrations.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getRegistrations($duration = 'default')
     {
         $registrations = cache()->get('nerdbot-users');
         if (! $registrations || $registrations == null) {
-            $users = User::where('created_at', '>', $this->current->subDay())->count();
-            cache()->put('nerdbot-users', $users, $this->expiresAt);
+            $registrations = User::where('created_at', '>', $this->current->subDay())->count();
+            cache()->put('nerdbot-users', $registrations, $this->expiresAt);
         }
 
-        return "In The Last 24 Hours {$users} Users Have Registered To ".config('other.title').'!';
+        return sprintf('In The Last 24 Hours %s Users Have Registered To ', $registrations).config('other.title').'!';
     }
 
     /**
      * Get Bot Donations.
+     *
+     * @param string $duration
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function getDonations($duration = 'default')
     {
@@ -278,14 +369,21 @@ class NerdBot
 
     /**
      * Send Bot Donation.
+     *
+     * @param int    $amount
+     * @param string $note
+     *
+     * @throws \Exception
+     *
+     * @return string
      */
     public function putDonate($amount = 0, $note = '')
     {
         $output = implode(' ', $note);
         $v = validator(['bot_id' => $this->bot->id, 'amount'=> $amount, 'note'=> $output], [
             'bot_id'   => 'required|exists:bots,id|max:999',
-            'amount'  => "required|numeric|min:1|max:{$this->target->seedbonus}",
-            'note' => 'required|string',
+            'amount'   => sprintf('required|numeric|min:1|max:%s', $this->target->seedbonus),
+            'note'     => 'required|string',
         ]);
         if ($v->passes()) {
             $value = $amount;
@@ -315,6 +413,13 @@ class NerdBot
 
     /**
      * Process Message.
+     *
+     * @param $type
+     * @param User   $target
+     * @param string $message
+     * @param int    $targeted
+     *
+     * @return bool
      */
     public function process($type, User $target, $message = '', $targeted = 0)
     {
@@ -329,7 +434,7 @@ class NerdBot
             $z = 3;
         }
 
-        if ($message == '') {
+        if ($message === '') {
             $log = '';
         } else {
             $log = 'All '.$this->bot->name.' commands must be a private message or begin with /'.$this->bot->command.' or !'.$this->bot->command.'. Need help? Type /'.$this->bot->command.' help and you shall be helped.';
@@ -422,7 +527,6 @@ class NerdBot
         if ($targeted) {
             // future holder
         }
-
         if ($type == 'message' || $type == 'private') {
             $receiver_dirty = 0;
             $receiver_echoes = cache()->get('user-echoes'.$target->id);
@@ -472,28 +576,29 @@ class NerdBot
                 cache()->put('user-audibles'.$target->id, $receiver_audibles, $expiresAt);
                 event(new Chatter('audible', $target->id, UserAudibleResource::collection($receiver_audibles)));
             }
-
             if ($txt != '') {
                 $room_id = 0;
                 $message = $this->chat->privateMessage($target->id, $room_id, $message, 1, $this->bot->id);
                 $message = $this->chat->privateMessage(1, $room_id, $txt, $target->id, $this->bot->id);
             }
 
-            return response('success', 200);
-        } elseif ($type == 'echo') {
+            return response('success');
+        }
+
+        if ($type == 'echo') {
             if ($txt != '') {
                 $room_id = 0;
                 $message = $this->chat->botMessage($this->bot->id, $room_id, $txt, $target->id);
             }
 
-            return response('success', 200);
+            return response('success');
         } elseif ($type == 'public') {
             if ($txt != '') {
                 $dumproom = $this->chat->message($target->id, $target->chatroom->id, $message, null, null);
                 $dumproom = $this->chat->message(1, $target->chatroom->id, $txt, null, $this->bot->id);
             }
 
-            return response('success', 200);
+            return response('success');
         }
 
         return true;

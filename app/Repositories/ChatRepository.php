@@ -2,29 +2,30 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Poppabear
  */
 
 namespace App\Repositories;
 
-use App\Models\Bot;
-use App\Events\Ping;
-use App\Models\User;
 use App\Events\Chatter;
-use App\Models\Message;
-use App\Models\Chatroom;
-use App\Models\UserEcho;
-use App\Models\ChatStatus;
-use App\Events\MessageSent;
-use App\Models\UserAudible;
 use App\Events\MessageDeleted;
+use App\Events\MessageSent;
+use App\Events\Ping;
 use App\Http\Resources\ChatMessageResource;
+use App\Models\Bot;
+use App\Models\Chatroom;
+use App\Models\ChatStatus;
+use App\Models\Message;
+use App\Models\User;
+use App\Models\UserAudible;
+use App\Models\UserEcho;
+use Illuminate\Support\Str;
 
 class ChatRepository
 {
@@ -145,9 +146,9 @@ class ChatRepository
         $message = $this->message->create([
             'user_id'     => $user_id,
             'chatroom_id' => $room_id,
-            'message' => $message,
+            'message'     => $message,
             'receiver_id' => $receiver,
-            'bot_id' => $bot,
+            'bot_id'      => $bot,
         ]);
 
         $this->checkMessageLimits($room_id);
@@ -168,7 +169,7 @@ class ChatRepository
             'bot_id'      => $bot_id,
             'user_id'     => 1,
             'chatroom_id' => 0,
-            'message' => $message,
+            'message'     => $message,
             'receiver_id' => $receiver,
         ]);
 
@@ -193,11 +194,11 @@ class ChatRepository
         $message = $this->htmlifyMessage($message);
 
         $save = $this->message->create([
-            'user_id' => $user_id,
+            'user_id'     => $user_id,
             'chatroom_id' => 0,
-            'message' => $message,
+            'message'     => $message,
             'receiver_id' => $receiver,
-            'bot_id' => $bot,
+            'bot_id'      => $bot,
         ]);
 
         $message = Message::with([
@@ -224,9 +225,11 @@ class ChatRepository
     {
         $message = $this->message->find($id);
 
-        broadcast(new MessageDeleted($message));
+        if ($message) {
+            broadcast(new MessageDeleted($message));
 
-        return $message->delete();
+            return $message->delete();
+        }
     }
 
     public function messages($room_id)
@@ -248,6 +251,8 @@ class ChatRepository
 
     public function botMessages($sender_id, $bot_id)
     {
+        $systemUserId = User::where('username', 'System')->firstOrFail()->id;
+
         return $this->message->with([
             'bot',
             'user.group',
@@ -255,8 +260,8 @@ class ChatRepository
             'user.chatStatus',
             'receiver.group',
             'receiver.chatStatus',
-        ])->where(function ($query) use ($sender_id, $bot_id) {
-            $query->whereRaw('(user_id = ? and receiver_id = ?)', [$sender_id, 1])->orWhereRaw('(user_id = ? and receiver_id = ?)', [1, $sender_id]);
+        ])->where(function ($query) use ($sender_id, $bot_id, $systemUserId) {
+            $query->whereRaw('(user_id = ? and receiver_id = ?)', [$sender_id, $systemUserId])->orWhereRaw('(user_id = ? and receiver_id = ?)', [$systemUserId, $sender_id]);
         })->where('bot_id', '=', $bot_id)
             ->orderBy('id', 'desc')
             ->limit(config('chat.message_limit'))
@@ -284,7 +289,7 @@ class ChatRepository
     {
         $messages = $this->messages($room_id)->toArray();
         $limit = config('chat.message_limit');
-        $count = count($messages);
+        $count = is_countable($messages) ? count($messages) : 0;
 
         // Lets purge all old messages and keep the database to the limit settings
         if ($count > $limit) {
@@ -303,10 +308,14 @@ class ChatRepository
 
     public function systemMessage($message, $bot = null)
     {
+        $systemUserId = User::where('username', 'System')->first()->id;
+
         if ($bot) {
-            $this->message(1, $this->systemChatroom(), $message, null, $bot);
+            $this->message($systemUserId, $this->systemChatroom(), $message, null, $bot);
         } else {
-            $this->message(1, $this->systemChatroom(), $message, null, 1);
+            $systemBotId = Bot::where('command', 'systembot')->first()->id;
+
+            $this->message($systemUserId, $this->systemChatroom(), $message, null, $systemBotId);
         }
 
         return $this;
@@ -366,13 +375,13 @@ class ChatRepository
     protected function censorMessage($message)
     {
         foreach (config('censor.redact') as $word) {
-            if (preg_match("/\b$word(?=[.,]|$|\s)/mi", $message)) {
-                $message = str_replace($word, "<span class='censor'>{$word}</span>", $message);
+            if (preg_match(sprintf('/\b%s(?=[.,]|$|\s)/mi', $word), $message)) {
+                $message = str_replace($word, sprintf('<span class=\'censor\'>%s</span>', $word), $message);
             }
         }
 
         foreach (config('censor.replace') as $word => $rword) {
-            if (str_contains($message, $word)) {
+            if (Str::contains($message, $word)) {
                 $message = str_replace($word, $rword, $message);
             }
         }

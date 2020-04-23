@@ -2,22 +2,22 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Notifications;
 
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class FailedLogin extends Notification implements ShouldQueue
 {
@@ -67,7 +67,7 @@ class FailedLogin extends Notification implements ShouldQueue
      *
      * @param mixed $notifiable
      *
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return array
      */
     public function toArray($notifiable)
     {
@@ -88,9 +88,9 @@ class FailedLogin extends Notification implements ShouldQueue
     {
         return (new MailMessage())
                 ->error()
-                ->subject('Failed Login Notification')
-                ->greeting('Account Login Failed!')
-                ->line('A failed login was detected for your account.')
-                ->line('This request originated from '.$this->ip.' ('.gethostbyaddr($this->ip).') at '.$this->time);
+                ->subject(trans('email.fail-login-subject'))
+                ->greeting(trans('email.fail-login-greeting'))
+                ->line(trans('email.fail-login-line1'))
+                ->line(trans('email.fail-login-line2', ['ip' => $this->ip, 'host' => gethostbyaddr($this->ip), 'time' => $this->time]));
     }
 }

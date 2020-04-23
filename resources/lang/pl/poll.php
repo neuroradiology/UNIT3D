@@ -1,22 +1,29 @@
 <?php
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
+ */
 
 return [
-    'add-option'           => 'Dodaj opcję',
-    'create-poll'          => 'Stwórz ankietę',
-    'current'              => 'Aktualne ankiety',
-    'delete-option'        => 'Usuń opcję',
-    'ip-checking'          => 'Ta ankieta nie dopuszcza podwójnych głosów.',
-    'ip-checking'          => 'Włącz sprawdzanie duplikowania adresów IP',
-    'ip-checking-warrning' => 'Wymagane jedynie gdy rejestracja jest otwarta',
-    'multiple-choice'      => 'Test wielokrotnego wyboru',
-    'multiple-choice'      => 'To jest ankieta wielokrotnego wyboru. Wybierz tyle odpowiedzi ile chcesz.',
-    'option'               => 'Opcja',
-    'poll'                 => 'Ankieta',
-    'polls'                => 'Ankiety',
-    'results'              => 'Wynik',
-    'title'                => 'Tytuł',
-    'total'                => 'Wszystkie głosy',
-    'vote'                 => 'Zagłosuj',
-    'vote-now'             => 'Zagłosuj!',
-    'votes'                => 'Głosy',
+  'add-option' => 'Dodaj opcję',
+  'create-poll' => 'Utwórz ankietę',
+  'current' => 'Bieżące ankiety',
+  'delete-option' => 'Usuń opcję',
+  'multiple-choice' => 'To sonda wielokrotnego wyboru. Wybierz tyle odpowiedzi, ile chcesz.',
+  'option' => 'Opcja',
+  'poll' => 'Głosowanie',
+  'polls' => 'Ankiety',
+  'results' => 'Wyniki ankiety',
+  'title' => 'Tytuł',
+  'total' => 'Razem głosów',
+  'vote' => 'Głosować',
+  'vote-now' => 'Uzyskaj głos teraz!',
+  'votes' => 'Głosy',
 ];

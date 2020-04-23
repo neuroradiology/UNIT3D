@@ -2,14 +2,15 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
+
 use App\Models\Group;
 use Illuminate\Database\Seeder;
 
@@ -211,7 +212,7 @@ class GroupsTableSeeder extends Seeder
             'position'     => 11,
             'color'        => '#1c4587',
             'icon'         => config('other.font-awesome').' fa-key',
-            'effect'       => 'url(https://i.imgur.com/F0UCb7A.gif)',
+            'effect'       => 'url(/img/sparkels.gif)',
             'is_trusted'   => 1,
             'is_immune'    => 1,
             'is_freeleech' => 1,
@@ -239,7 +240,7 @@ class GroupsTableSeeder extends Seeder
             'position'     => 13,
             'color'        => '#1c4587',
             'icon'         => config('other.font-awesome').' fa-server',
-            'effect'       => 'url(https://i.imgur.com/F0UCb7A.gif)',
+            'effect'       => 'url(/img/sparkels.gif)',
             'is_trusted'   => 1,
             'is_immune'    => 1,
             'is_freeleech' => 1,

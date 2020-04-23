@@ -2,13 +2,13 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers;
@@ -19,14 +19,25 @@ use Illuminate\Support\Facades\DB;
 class PageController extends Controller
 {
     /**
-     * Show A Page.
-     *
-     * @param $slug
-     * @param $id
+     * Display All Pages.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function page($slug, $id)
+    public function index()
+    {
+        $pages = Page::all();
+
+        return view('page.index', ['pages' => $pages]);
+    }
+
+    /**
+     * Show A Page.
+     *
+     * @param \App\Models\Page $id
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show($id)
     {
         $page = Page::findOrFail($id);
 
@@ -40,7 +51,7 @@ class PageController extends Controller
      */
     public function staff()
     {
-        $staff = DB::table('users')->leftJoin('groups', 'users.group_id', '=', 'groups.id')->select('users.id', 'users.title', 'users.username', 'groups.name', 'groups.color', 'groups.icon')->where('groups.is_admin', 1)->orWhere('groups.is_modo', 1)->get();
+        $staff = DB::table('users')->leftJoin('groups', 'users.group_id', '=', 'groups.id')->select(['users.id', 'users.title', 'users.username', 'groups.name', 'groups.color', 'groups.icon'])->where('groups.is_admin', 1)->orWhere('groups.is_modo', 1)->get();
 
         return view('page.staff', ['staff' => $staff]);
     }
@@ -52,7 +63,7 @@ class PageController extends Controller
      */
     public function internal()
     {
-        $internal = DB::table('users')->leftJoin('groups', 'users.group_id', '=', 'groups.id')->select('users.id', 'users.title', 'users.username', 'groups.name', 'groups.color', 'groups.icon')->where('groups.is_internal', 1)->get();
+        $internal = DB::table('users')->leftJoin('groups', 'users.group_id', '=', 'groups.id')->select(['users.id', 'users.title', 'users.username', 'groups.name', 'groups.color', 'groups.icon'])->where('groups.is_internal', 1)->get();
 
         return view('page.internal', ['internal' => $internal]);
     }

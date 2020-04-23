@@ -2,30 +2,34 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers\Auth;
 
-use Carbon\Carbon;
-use App\Traits\TwoStep;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Traits\TwoStep;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class TwoStepController extends Controller
 {
     use TwoStep;
 
     private $_authCount;
+
     private $_authStatus;
+
     private $_twoStepAuth;
+
     private $_remainingAttempts;
+
     private $_user;
 
     /**
@@ -89,6 +93,8 @@ class TwoStepController extends Controller
     /**
      * Show the twostep verification form.
      *
+     * @throws \Exception
+     *
      * @return \Illuminate\Http\Response
      */
     public function showVerification()
@@ -144,7 +150,7 @@ class TwoStepController extends Controller
     /**
      * Verify the user code input.
      *
-     * @param Request $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return \Illuminate\Http\Response
      */
@@ -185,9 +191,8 @@ class TwoStepController extends Controller
             ];
 
             return response()->json($returnData, 200);
-        } else {
-            abort(404);
         }
+        abort(404);
     }
 
     /**

@@ -2,13 +2,13 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie, singularity43
  */
 
 namespace App\Notifications;
@@ -22,12 +22,14 @@ class NewThank extends Notification
     use Queueable;
 
     public $type;
+
     public $thank;
 
     /**
      * Create a new notification instance.
      *
-     * @return void
+     * @param string $type
+     * @param Thank  $thank
      */
     public function __construct(string $type, Thank $thank)
     {
@@ -60,8 +62,8 @@ class NewThank extends Notification
 
         return [
             'title' => $this->thank->user->username.' Has Thanked You For An Uploaded Torrent',
-            'body' => $this->thank->user->username.' has left you a thanks on Uploaded Torrent '.$this->thank->torrent->name,
-            'url' => '/torrents/'.$this->thank->torrent->slug.'.'.$this->thank->torrent->id,
+            'body'  => $this->thank->user->username.' has left you a thanks on Uploaded Torrent '.$this->thank->torrent->name,
+            'url'   => '/torrents/'.$this->thank->torrent->id,
         ];
     }
 }

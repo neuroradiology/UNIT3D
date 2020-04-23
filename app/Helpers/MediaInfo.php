@@ -2,20 +2,38 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Helpers;
 
 class MediaInfo
 {
-    private $regex_section = "/^(?:(?:general|video|audio|text|menu)(?:\s\#\d+?)*)$/i";
+    private const REGEX_SECTION = "/^(?:(?:general|video|audio|text|menu)(?:\s\#\d+?)*)$/i";
+
+    /**
+     * @var string[]
+     */
+    private const REPLACE = [
+        ' '        => '',
+        'channels' => 'ch',
+        'channel'  => 'ch',
+        '1ch'      => '1.0ch',
+        '7ch'      => '6.1ch',
+        '6ch'      => '5.1ch',
+        '2ch'      => '2.0ch',
+    ];
+
+    /**
+     * @var int[]
+     */
+    private const FACTORS = ['b' => 0, 'kb' => 1, 'mb' => 2, 'gb' => 3, 'tb' => 4, 'pb' => 5, 'eb' => 6, 'zb' => 7, 'yb' => 8];
 
     public function parse($string)
     {
@@ -25,7 +43,7 @@ class MediaInfo
         $output = [];
         foreach ($lines as $line) {
             $line = trim($line); // removed strtolower, unnecessary with the i-switch in the regexp (caseless) and adds problems with values; added it in the required places instead.
-            if (preg_match($this->regex_section, $line)) {
+            if (preg_match(self::REGEX_SECTION, $line)) {
                 $section = $line;
                 $output[$section] = [];
             }
@@ -47,7 +65,7 @@ class MediaInfo
         foreach ($sections as $key => $section) {
             $key_section = strtolower(explode(' ', $key)[0]);
             if (! empty($section)) {
-                if ($key_section == 'general') {
+                if ($key_section === 'general') {
                     $output[$key_section] = $this->parseProperty($section, $key_section);
                 } else {
                     $output[$key_section][] = $this->parseProperty($section, $key_section);
@@ -76,59 +94,74 @@ class MediaInfo
                             case 'complete name':
                             case 'completename':
                                 $output['file_name'] = self::stripPath($value);
+
                                 break;
                             case 'format':
                                 $output['format'] = $value;
+
                                 break;
                             case 'duration':
                                 $output['duration'] = $value;
+
                                 break;
                             case 'file size':
                             case 'filesize':
                                 $output['file_size'] = $this->parseFileSize($value);
+
                                 break;
                             case 'overall bit rate':
                             case 'overallbitrate':
                                 $output['bit_rate'] = $this->parseBitRate($value);
+
                                 break;
                         }
+
                         break;
 
                     case 'video':
                         switch ($property) {
                             case 'format':
                                 $output['format'] = $value;
+
                                 break;
                             case 'format version':
                             case 'format_version':
                                 $output['format_version'] = $value;
+
                                 break;
                             case 'codec id':
                             case 'codecid':
                                 $output['codec'] = $value;
+
                                 break;
                             case 'width':
                                 $output['width'] = $this->parseWidthHeight($value);
+
                                 break;
                             case 'height':
                                 $output['height'] = $this->parseWidthHeight($value);
+
                                 break;
                             case 'stream size':
                             case 'stream_size':
                                 $output['stream_size'] = $this->parseFileSize($value);
+
                                 break;
                             case 'writing library':
                             case 'encoded_library':
                                 $output['writing_library'] = $value;
+
                                 break;
                             case 'frame rate mode':
                             case 'framerate_mode':
                                 $output['framerate_mode'] = $value;
+
                                 break;
                             case 'frame rate':
                             case 'framerate':
                                 // if variable this becomes Original frame rate
                                 $output['frame_rate'] = $value;
+
                                 break;
                             case 'display aspect ratio':
                             case 'displayaspectratio':
@@ -137,42 +170,54 @@ class MediaInfo
                             case 'bit rate':
                             case 'bitrate':
                                 $output['bit_rate'] = $this->parseBitRate($value);
+
                                 break;
                             case 'bit rate mode':
                             case 'bitrate_mode':
                                 $output['bit_rate_mode'] = $value;
+
                                 break;
                             case 'nominal bit rate':
                             case 'bitrate_nominal':
                                 $output['bit_rate_nominal'] = $this->parseBitRate($value);
+
                                 break;
                             case 'bits/(pixel*frame)':
                             case 'bits-(pixel*frame)':
                                 $output['bit_pixel_frame'] = $value;
+
                                 break;
                             case 'bit depth':
                             case 'bitdepth':
                                 $output['bit_depth'] = $value;
+
                                 break;
                             case 'encoding settings':
                                 $output['encoding_settings'] = $value;
+
                                 break;
                             case 'language':
                                 $output['language'] = $value;
+
                                 break;
                             case 'format profile':
                                 $output['format_profile'] = $value;
+
                                 break;
                             case 'title':
                                 $output['title'] = $value;
+
                                 break;
                             case 'color primaries':
                                 $output['title'] = $value;
+
                                 break;
                             case 'scan type':
                                 $output['scan_type'] = $value;
+
                                 break;
                         }
+
                         break;
 
                     case 'audio':
@@ -180,32 +225,41 @@ class MediaInfo
                             case 'codec id':
                             case 'codecid':
                                 $output['codec'] = $value;
+
                                 break;
                             case 'format':
                                 $output['format'] = $value;
+
                                 break;
                             case 'bit rate':
                             case 'bitrate':
                                 $output['bit_rate'] = $this->parseBitRate($value);
+
                                 break;
                             case 'channel(s)':
                                 $output['channels'] = $this->parseAudioChannels($value);
+
                                 break;
                             case 'title':
                                 $output['title'] = $value;
+
                                 break;
                             case 'language':
                                 $output['language'] = $value;
+
                                 break;
                             case 'format profile':
                             case 'format_profile':
                                 $output['format_profile'] = $value;
+
                                 break;
                             case 'stream size':
                             case 'stream_size':
                                 $output['stream_size'] = $this->parseFileSize($value);
+
                                 break;
                         }
+
                         break;
 
                     case 'text':
@@ -213,23 +267,30 @@ class MediaInfo
                             case 'codec id':
                             case 'codecid':
                                 $output['codec'] = $value;
+
                                 break;
                             case 'format':
                                 $output['format'] = $value;
+
                                 break;
                             case 'title':
                                 $output['title'] = $value;
+
                                 break;
                             case 'language':
                                 $output['language'] = $value;
+
                                 break;
                             case 'default':
                                 $output['default'] = $value;
+
                                 break;
                             case 'forced':
                                 $output['forced'] = $value;
+
                                 break;
                         }
+
                         break;
                 }
             }
@@ -260,9 +321,8 @@ class MediaInfo
     private function parseBitRate($string)
     {
         $string = str_replace(' ', '', strtolower($string));
-        $string = str_replace('kbps', ' kbps', $string);
 
-        return $string;
+        return str_replace('kbps', ' kbps', $string);
     }
 
     private function parseWidthHeight($string)
@@ -272,17 +332,7 @@ class MediaInfo
 
     private function parseAudioChannels($string)
     {
-        $replace = [
-            ' '        => '',
-            'channels' => 'ch',
-            'channel'  => 'ch',
-            '1ch'      => '1.0ch',
-            '7ch'      => '6.1ch',
-            '6ch'      => '5.1ch',
-            '2ch'      => '2.0ch',
-        ];
-
-        return str_ireplace(array_keys($replace), $replace, $string);
+        return str_ireplace(array_keys(self::REPLACE), self::REPLACE, $string);
     }
 
     private function formatOutput($data)
@@ -370,7 +420,7 @@ class MediaInfo
                         $temp_text_output[] = $text_element[$property];
                     }
                 }
-                if (isset($text_element['forced']) && strtolower($text_element['forced']) == 'yes') {
+                if (isset($text_element['forced']) && strtolower($text_element['forced']) === 'yes') {
                     $temp_text_output[] = 'Forced';
                 }
 
@@ -394,10 +444,8 @@ class MediaInfo
         $bytes = (float) $number;
         $size = strtolower($size);
 
-        $factors = ['b' => 0, 'kb' => 1, 'mb' => 2, 'gb' => 3, 'tb' => 4, 'pb' => 5, 'eb' => 6, 'zb' => 7, 'yb' => 8];
-
-        if (isset($factors[$size])) {
-            return (float) number_format($bytes * pow(1024, $factors[$size]), 2, '.', '');
+        if (isset(self::FACTORS[$size])) {
+            return (float) number_format($bytes * pow(1_024, self::FACTORS[$size]), 2, '.', '');
         }
 
         return $bytes;

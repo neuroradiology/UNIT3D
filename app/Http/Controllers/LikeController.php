@@ -2,103 +2,90 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers;
 
 use App\Models\Like;
 use App\Models\Post;
-use Brian2694\Toastr\Toastr;
+use Illuminate\Http\Request;
 
 class LikeController extends Controller
 {
     /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * LikeController Constructor.
-     *
-     * @param Toastr               $toastr
-     */
-    public function __construct(Toastr $toastr)
-    {
-        $this->toastr = $toastr;
-    }
-
-    /**
      * Like A Post.
      *
-     * @param $postId
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Post         $postId
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store($postId)
+    public function store(Request $request, $postId)
     {
         $post = Post::findOrFail($postId);
-        $postUrl = "forums/topic/{$post->topic->slug}.{$post->topic->id}?page={$post->getPageNumber()}#post-{$postId}";
+        $postUrl = sprintf('forums/topics/%s?page=%s#post-%s', $post->topic->id, $post->getPageNumber(), $postId);
 
-        $user = auth()->user();
+        $user = $request->user();
         $like = $user->likes()->where('post_id', '=', $post->id)->where('like', '=', 1)->first();
         $dislike = $user->likes()->where('post_id', '=', $post->id)->where('dislike', '=', 1)->first();
-
         if ($like || $dislike) {
-            return redirect($postUrl)
-                ->with($this->toastr->error('You have already liked/disliked this post!', 'Bro', ['options']));
-        } elseif ($user->id == $post->user_id) {
-            return redirect($postUrl)
-                ->with($this->toastr->error('You cannot like your own post!', 'Umm', ['options']));
-        } else {
-            $new = new Like();
-            $new->user_id = $user->id;
-            $new->post_id = $post->id;
-            $new->like = 1;
-            $new->save();
-
-            return redirect($postUrl)
-                ->with($this->toastr->success('Like Successfully Applied!', 'Yay', ['options']));
+            return redirect()->to($postUrl)
+                ->withErrors('You have already liked/disliked this post!');
         }
+
+        if ($user->id == $post->user_id) {
+            return redirect()->to($postUrl)
+                ->withErrors('You cannot like your own post!');
+        }
+        $new = new Like();
+        $new->user_id = $user->id;
+        $new->post_id = $post->id;
+        $new->like = 1;
+        $new->save();
+
+        return redirect()->to($postUrl)
+                ->withSuccess('Like Successfully Applied!');
     }
 
     /**
      * Dislike A Post.
      *
-     * @param $postId
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Post         $postId
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($postId)
+    public function destroy(Request $request, $postId)
     {
         $post = Post::findOrFail($postId);
-        $postUrl = "forums/topic/{$post->topic->slug}.{$post->topic->id}?page={$post->getPageNumber()}#post-{$postId}";
+        $postUrl = sprintf('forums/topics/%s?page=%s#post-%s', $post->topic->id, $post->getPageNumber(), $postId);
 
-        $user = auth()->user();
+        $user = $request->user();
         $like = $user->likes()->where('post_id', '=', $post->id)->where('like', '=', 1)->first();
         $dislike = $user->likes()->where('post_id', '=', $post->id)->where('dislike', '=', 1)->first();
-
         if ($like || $dislike) {
-            return redirect($postUrl)
-                ->with($this->toastr->error('You have already liked/disliked this post!', 'Bro', ['options']));
-        } elseif ($user->id == $post->user_id) {
-            return redirect($postUrl)
-                ->with($this->toastr->error('You cannot dislike your own post!', 'Umm', ['options']));
-        } else {
-            $new = new Like();
-            $new->user_id = $user->id;
-            $new->post_id = $post->id;
-            $new->dislike = 1;
-            $new->save();
-
-            return redirect($postUrl)
-                ->with($this->toastr->success('Dislike Successfully Applied!', 'Yay', ['options']));
+            return redirect()->to($postUrl)
+                ->withErrors('You have already liked/disliked this post!');
         }
+
+        if ($user->id == $post->user_id) {
+            return redirect()->to($postUrl)
+                ->withErrors('You cannot dislike your own post!');
+        }
+        $new = new Like();
+        $new->user_id = $user->id;
+        $new->post_id = $post->id;
+        $new->dislike = 1;
+        $new->save();
+
+        return redirect()->to($postUrl)
+                ->withSuccess('Dislike Successfully Applied!');
     }
 }

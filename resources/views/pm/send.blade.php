@@ -24,26 +24,27 @@
                     <form role="form" method="POST" action="{{ route('send-pm') }}">
                         @csrf
                         <div class="form-group">
-                            <label for="users">@lang('pm.select')</label>
-                            <select class="js-example-basic-single form-control" name="receiver_id">
-                                    <option value="{{ $receiver_id }}">{{ $username }}</option>
-                                @foreach ($usernames as $username)
-                                    <option value="{{ $username->id }}">{{ $username->username }}</option>
-                                @endforeach
-                            </select>
+                            <label for="users">@lang('common.username')</label>
+                            <label>
+                                <label>
+                                <input name="receiver_id" class="form-control" placeholder="@lang('common.username')" {{request()->has('username') ? 'readonly' : 'required'}} value="{{request()->has('username') ? request()->get('username') : '' }}">    
+                            </label>
+                            </label>
                         </div>
-
+    
                         <div class="form-group">
                             <label for="">@lang('pm.subject')</label>
-                            <input name="subject" class="form-control" placeholder="@lang('pm.enter-subject')"
-                                   required>
+                            <label>
+                                <input name="subject" class="form-control" placeholder="@lang('pm.enter-subject')" required>
+                            </label>
                         </div>
-
+    
                         <div class="form-group">
                             <label for="">@lang('pm.message')</label>
+                            <label for="message"></label>
                             <textarea id="message" name="message" cols="30" rows="10" class="form-control"></textarea>
                         </div>
-
+    
                         <button class="btn btn-primary">
                             <i class="{{ config('other.font-awesome') }} fa-save"></i> @lang('pm.send')
                         </button>
@@ -56,15 +57,9 @@
 
 @section('javascripts')
     <script nonce="{{ Bepsvpt\SecureHeaders\SecureHeaders::nonce() }}">
-      $(document).ready(function () {
-        $('.js-example-basic-single').select2()
-      })
-    </script>
-
-    <script nonce="{{ Bepsvpt\SecureHeaders\SecureHeaders::nonce() }}">
-      $(document).ready(function () {
-        $('#message').wysibb({});
-        emoji.textcomplete()
-      })
+        $(document).ready(function() {
+            $('#message').wysibb({});
+        })
+    
     </script>
 @endsection

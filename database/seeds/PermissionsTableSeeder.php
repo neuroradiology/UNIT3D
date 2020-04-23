@@ -1,4 +1,15 @@
 <?php
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
+ */
 
 use Illuminate\Database\Seeder;
 
@@ -357,41 +368,41 @@ class PermissionsTableSeeder extends Seeder
                 'start_topic' => 1,
             ],
             38 => [
-                    'id'          => 39,
-                    'forum_id'    => 1,
-                    'group_id'    => 20,
-                    'show_forum'  => 0,
-                    'read_topic'  => 0,
-                    'reply_topic' => 0,
-                    'start_topic' => 0,
-                ],
+                'id'          => 39,
+                'forum_id'    => 1,
+                'group_id'    => 20,
+                'show_forum'  => 0,
+                'read_topic'  => 0,
+                'reply_topic' => 0,
+                'start_topic' => 0,
+            ],
             39 => [
-                    'id'          => 40,
-                    'forum_id'    => 1,
-                    'group_id'    => 21,
-                    'show_forum'  => 0,
-                    'read_topic'  => 0,
-                    'reply_topic' => 0,
-                    'start_topic' => 0,
-                ],
+                'id'          => 40,
+                'forum_id'    => 1,
+                'group_id'    => 21,
+                'show_forum'  => 0,
+                'read_topic'  => 0,
+                'reply_topic' => 0,
+                'start_topic' => 0,
+            ],
             40 => [
-                    'id'          => 41,
-                    'forum_id'    => 2,
-                    'group_id'    => 20,
-                    'show_forum'  => 0,
-                    'read_topic'  => 0,
-                    'reply_topic' => 0,
-                    'start_topic' => 0,
-                ],
+                'id'          => 41,
+                'forum_id'    => 2,
+                'group_id'    => 20,
+                'show_forum'  => 0,
+                'read_topic'  => 0,
+                'reply_topic' => 0,
+                'start_topic' => 0,
+            ],
             41 => [
-                    'id'          => 42,
-                    'forum_id'    => 2,
-                    'group_id'    => 21,
-                    'show_forum'  => 0,
-                    'read_topic'  => 0,
-                    'reply_topic' => 0,
-                    'start_topic' => 0,
-                ],
+                'id'          => 42,
+                'forum_id'    => 2,
+                'group_id'    => 21,
+                'show_forum'  => 0,
+                'read_topic'  => 0,
+                'reply_topic' => 0,
+                'start_topic' => 0,
+            ],
         ]);
     }
 }

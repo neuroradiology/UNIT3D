@@ -1,15 +1,14 @@
 <?php
-
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Console;
@@ -25,37 +24,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        // Scheduled Commands
-        \App\Console\Commands\AutoNerdStat::class,
-        \App\Console\Commands\AutoBonAllocation::class,
-        \App\Console\Commands\AutoHighspeedTag::class,
-        \App\Console\Commands\AutoPreWarning::class,
-        \App\Console\Commands\AutoWarning::class,
-        \App\Console\Commands\AutoDeactivateWarning::class,
-        \App\Console\Commands\AutoRevokePermissions::class,
-        \App\Console\Commands\AutoBan::class,
-        \App\Console\Commands\AutoFlushPeers::class,
-        \App\Console\Commands\AutoGroup::class,
-        \App\Console\Commands\AutoRemovePersonalFreeleech::class,
-        \App\Console\Commands\AutoRemoveFeaturedTorrent::class,
-        \App\Console\Commands\AutoGraveyard::class,
-        \App\Console\Commands\IrcBroadcast::class,
-        \App\Console\Commands\IrcMessage::class,
-        \App\Console\Commands\AutoRecycleInvites::class,
-        \App\Console\Commands\AutoRecycleActivityLog::class,
-        \App\Console\Commands\AutoRecycleFailedLogins::class,
-        \App\Console\Commands\AutoDisableInactiveUsers::class,
-        \App\Console\Commands\AutoSoftDeleteDisabledUsers::class,
-        \App\Console\Commands\AutoRecycleClaimedTorrentRequests::class,
-        \App\Console\Commands\AutoCorrectHistory::class,
 
-        // Manually Run Commands
-        \App\Console\Commands\DemoSeed::class,
-        \App\Console\Commands\GitUpdater::class,
-        \App\Console\Commands\ClearCache::class,
-        \App\Console\Commands\SetCache::class,
-        \App\Console\Commands\TestMailSettings::class,
-        \App\Console\Commands\FetchGenres::class,
     ];
 
     /**
@@ -77,7 +46,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('auto:revoke_permissions')->hourly();
         $schedule->command('auto:ban')->hourly();
         $schedule->command('auto:flush_peers')->hourly();
-        //$schedule->command('auto:correct_history')->hourly();
         $schedule->command('auto:bon_allocation')->hourly();
         $schedule->command('auto:remove_personal_freeleech')->hourly();
         $schedule->command('auto:remove_featured_torrent')->hourly();
@@ -87,6 +55,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('auto:disable_inactive_users')->daily();
         $schedule->command('auto:softdelete_disabled_users')->daily();
         $schedule->command('auto:recycle_claimed_torrent_requests')->daily();
+        $schedule->command('auto:correct_history')->daily();
+        $schedule->command('auto:sync_peers')->daily();
     }
 
     /**

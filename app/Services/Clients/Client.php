@@ -2,25 +2,22 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Services\Clients;
 
-use Predis\Client as RedisClient;
 use GuzzleHttp\Client as GuzzleClient;
 
 abstract class Client
 {
     protected $guzzle;
-
-    protected $redis;
 
     protected $apiUrl;
 
@@ -30,7 +27,6 @@ abstract class Client
 
     public function __construct($apiUrl, $apiKey = null)
     {
-        $this->redis = new RedisClient();
         $this->apiUrl = ($this->apiSecure ? 'https://' : 'http://').$apiUrl;
         $this->apiKey = $apiKey;
         $this->guzzle = new GuzzleClient();
@@ -71,13 +67,11 @@ abstract class Client
         $key = 'movietvdb:'.$key;
 
         if ($data) {
-            $this->redis->setex($key, 604800, serialize($data));
-
-            return $data;
+            cache()->remember($key, 7 * 24 * 60, fn () => serialize($data));
         }
 
-        if ($cache = $this->redis->get($key)) {
-            return unserialize($cache);
+        if (cache()->has($key)) {
+            return unserialize(cache()->get($key));
         }
 
         return $data;
@@ -85,20 +79,20 @@ abstract class Client
 
     protected function validateKeys($keys)
     {
-        /*if (!empty($keys['imdb'])) {
-            if (!preg_match('/tt\\d{7}/', $keys['imdb'])) {
+        /*if (! empty($keys['imdb'])) {
+            if (! preg_match('/tt\\d{7}/', $keys['imdb'])) {
                 throw new \InvalidArgumentException('Invalid IMDB ID');
             }
         }
 
-        if (!empty($keys['tmdb'])) {
-            if (!is_numeric($keys['tmdb'])) {
+        if (! empty($keys['tmdb'])) {
+            if (! is_numeric($keys['tmdb'])) {
                 throw new \InvalidArgumentException('Invalid TMDB ID');
             }
         }
 
-        if (!empty($keys['tvdb'])) {
-            if (!is_numeric($keys['tvdb'])) {
+        if (! empty($keys['tvdb'])) {
+            if (! is_numeric($keys['tvdb'])) {
                 throw new \InvalidArgumentException('Invalid TVDB ID');
             }
         }*/

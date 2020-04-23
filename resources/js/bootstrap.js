@@ -60,28 +60,13 @@ window.Echo = new Echo({
     host: window.location.hostname + ':8443',
 });
 
-/**
- * UNIT3D
- */
-require('select2');
-window.Ladda = require('ladda');
-
 /*
  * jQuery Extensions
  *
  * Note: Eventually we will end up 100% jQuery free with the conversion to VueJS
  */
-require('jquery-textcomplete');
-
-// countUp JS from npm
-window.CountUp = require('countup.js');
-
 // wysibb editor
 require('./wysibb/jquery.wysibb');
 
-// emojis
-window.emoji = require('./unit3d/emoji');
-
 //alerts
-window.swal = require('sweetalert2');
-window.toastr = require('toastr');
+window.Swal = require('sweetalert2');

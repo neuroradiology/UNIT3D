@@ -2,27 +2,47 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Poppabear
  */
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\ChatStatus.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $color
+ * @property string|null $icon
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $users
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus whereColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus whereIcon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ChatStatus whereUpdatedAt($value)
+ * @mixin \Eloquent
+ *
+ * @property-read int|null $users_count
+ */
 class ChatStatus extends Model
 {
-    /**
-     * The Database Table Used By The Model.
-     *
-     * @var string
-     */
-    protected $table = 'chat_statuses';
+    use Auditable;
 
     /**
      * A Status Has Many Users.

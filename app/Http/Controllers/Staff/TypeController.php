@@ -2,41 +2,26 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers\Staff;
 
-use App\Models\Type;
-use Brian2694\Toastr\Toastr;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Type;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class TypeController extends Controller
 {
     /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * TypeController Constructor.
-     *
-     * @param Toastr $toastr
-     */
-    public function __construct(Toastr $toastr)
-    {
-        $this->toastr = $toastr;
-    }
-
-    /**
-     * Get All Types.
+     * Display All Types.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -48,27 +33,27 @@ class TypeController extends Controller
     }
 
     /**
-     * Type Add Form.
+     * Show Type Create Form.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function addForm()
+    public function create()
     {
-        return view('Staff.type.add');
+        return view('Staff.type.create');
     }
 
     /**
-     * Add A Type.
+     * Store A New Type.
      *
      * @param \Illuminate\Http\Request $request
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function add(Request $request)
+    public function store(Request $request)
     {
         $type = new Type();
         $type->name = $request->input('name');
-        $type->slug = str_slug($type->name);
+        $type->slug = Str::slug($type->name);
         $type->position = $request->input('position');
 
         $v = validator($type->toArray(), [
@@ -78,25 +63,23 @@ class TypeController extends Controller
         ]);
 
         if ($v->fails()) {
-            return redirect()->route('staff_type_index')
-                ->with($this->toastr->error($v->errors()->toJson(), 'Whoops!', ['options']));
-        } else {
-            $type->save();
-
-            return redirect()->route('staff_type_index')
-                ->with($this->toastr->success('Type Successfully Added', 'Yay!', ['options']));
+            return redirect()->route('staff.types.index')
+                ->withErrors($v->errors());
         }
+        $type->save();
+
+        return redirect()->route('staff.types.index')
+            ->withSuccess('Type Successfully Added');
     }
 
     /**
      * Type Edit Form.
      *
-     * @param $slug
-     * @param $id
+     * @param \App\Models\Type $id
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function editForm($slug, $id)
+    public function edit($id)
     {
         $type = Type::findOrFail($id);
 
@@ -107,16 +90,15 @@ class TypeController extends Controller
      * Edit A Type.
      *
      * @param \Illuminate\Http\Request $request
-     * @param $slug
-     * @param $id
+     * @param \App\Models\Type         $id
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function edit(Request $request, $slug, $id)
+    public function update(Request $request, $id)
     {
         $type = Type::findOrFail($id);
         $type->name = $request->input('name');
-        $type->slug = str_slug($type->name);
+        $type->slug = Str::slug($type->name);
         $type->position = $request->input('position');
 
         $v = validator($type->toArray(), [
@@ -126,30 +108,28 @@ class TypeController extends Controller
         ]);
 
         if ($v->fails()) {
-            return redirect()->route('staff_type_index')
-                ->with($this->toastr->error($v->errors()->toJson(), 'Whoops!', ['options']));
-        } else {
-            $type->save();
-
-            return redirect()->route('staff_type_index')
-                ->with($this->toastr->success('Type Successfully Modified', 'Yay!', ['options']));
+            return redirect()->route('staff.types.index')
+                ->withErrors($v->errors());
         }
+        $type->save();
+
+        return redirect()->route('staff.types.index')
+            ->withSuccess('Type Successfully Modified');
     }
 
     /**
      * Delete A Type.
      *
-     * @param $slug
-     * @param $id
+     * @param \App\Models\Type $id
      *
-     * @return Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function delete($slug, $id)
+    public function destroy($id)
     {
         $type = Type::findOrFail($id);
         $type->delete();
 
-        return redirect()->route('staff_type_index')
-            ->with($this->toastr->success('Type Successfully Deleted', 'Yay!', ['options']));
+        return redirect()->route('staff.types.index')
+            ->withSuccess('Type Successfully Deleted');
     }
 }

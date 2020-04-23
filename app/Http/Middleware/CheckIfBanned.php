@@ -2,38 +2,22 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Middleware;
 
-use Closure;
 use App\Models\Group;
-use Brian2694\Toastr\Toastr;
+use Closure;
 
 class CheckIfBanned
 {
-    /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * CheckIfBanned Middleware Constructor.
-     *
-     * @param Toastr $toastr
-     */
-    public function __construct(Toastr $toastr)
-    {
-        $this->toastr = $toastr;
-    }
-
     /**
      * Handle an incoming request.
      *
@@ -41,19 +25,21 @@ class CheckIfBanned
      * @param \Closure                 $next
      * @param string|null              $guard
      *
+     * @throws \Exception
+     *
      * @return mixed
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        $user = auth()->user();
-        $bannedGroup = Group::where('slug', '=', 'banned')->select('id')->first();
+        $user = $request->user();
+        $banned_group = cache()->rememberForever('banned_group', fn () => Group::where('slug', '=', 'banned')->pluck('id'));
 
-        if ($user && $user->group_id == $bannedGroup->id) {
+        if ($user && $user->group_id == $banned_group[0]) {
             auth()->logout();
             $request->session()->flush();
 
-            return redirect('login')
-                ->with($this->toastr->error('This account is Banned!', 'Whoops!', ['options']));
+            return redirect()->route('login')
+                ->withErrors('This account is Banned!');
         }
 
         return $next($request);

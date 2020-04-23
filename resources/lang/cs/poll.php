@@ -1,20 +1,29 @@
 <?php
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
+ */
 
 return [
-    'add-option'           => 'Přidat možnost',
-    'create-poll'          => 'Vytvořte hlasování',
-    'current'              => 'Aktuální anketa',
-    'delete-option'        => 'Možnost Smazat',
-    'ip-checking'          => 'Toto hlasování má duplicitní kontrolu hlasování. Můžete hlasovat pouze jednou.',
-    'ip-checking-warrning' => 'Potřebné pouze v případě, že je ve veřejném režimu',
-    'multiple-choice'      => 'Jedná se o hlasování s více volbami. Vyberte si tolik odpovědí, kolik chcete.',
-    'option'               => 'Volba',
-    'poll'                 => 'Hlasování',
-    'polls'                => 'Ankety',
-    'results'              => 'Výsledky průzkumu',
-    'title'                => 'Titul',
-    'total'                => 'Celkový počet hlasů někdy',
-    'vote'                 => 'Hlasování',
-    'vote-now'             => 'Zaregistrujte se!',
-    'votes'                => 'Hlasy',
+  'add-option' => 'Přidat možnost',
+  'create-poll' => 'Vytvořit anketu',
+  'current' => 'Aktuální ankety',
+  'delete-option' => 'Možnost Odstranit',
+  'multiple-choice' => 'Toto je anketa s více volbami. Vyberte tolik odpovědí, kolik chcete.',
+  'option' => 'Volba',
+  'poll' => 'Hlasování',
+  'polls' => 'Ankety',
+  'results' => 'Výsledky ankety',
+  'title' => 'Titul',
+  'total' => 'Celkem hlasů',
+  'vote' => 'Hlasování',
+  'vote-now' => 'Získejte svůj hlas nyní!',
+  'votes' => 'Hlasy',
 ];

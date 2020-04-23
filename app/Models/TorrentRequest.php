@@ -2,23 +2,94 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     Mr.G
  */
 
 namespace App\Models;
 
 use App\Helpers\Bbcode;
+use App\Helpers\Linkify;
 use App\Notifications\NewComment;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use voku\helper\AntiXSS;
 
+/**
+ * App\Models\TorrentRequest.
+ *
+ * @property int $id
+ * @property string $name
+ * @property int $category_id
+ * @property \App\Models\Type $type
+ * @property string|null $imdb
+ * @property string|null $tvdb
+ * @property string|null $tmdb
+ * @property string|null $mal
+ * @property string $description
+ * @property int $user_id
+ * @property float $bounty
+ * @property int $votes
+ * @property int|null $claimed
+ * @property int $anon
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $filled_by
+ * @property string|null $filled_hash
+ * @property \Illuminate\Support\Carbon|null $filled_when
+ * @property int $filled_anon
+ * @property int|null $approved_by
+ * @property \Illuminate\Support\Carbon|null $approved_when
+ * @property-read \App\Models\User|null $FillUser
+ * @property-read \App\Models\User|null $approveUser
+ * @property-read \App\Models\Category $category
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Comment[] $comments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TorrentRequestBounty[] $requestBounty
+ * @property-read \App\Models\Torrent|null $torrent
+ * @property-read \App\Models\User $user
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereAnon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereApprovedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereApprovedWhen($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereBounty($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereClaimed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereFilledAnon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereFilledBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereFilledHash($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereFilledWhen($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereImdb($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereMal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereTmdb($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereTvdb($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereVotes($value)
+ * @mixin \Eloquent
+ *
+ * @property string $igdb
+ * @property-read int|null $comments_count
+ * @property-read int|null $request_bounty_count
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TorrentRequest whereIgdb($value)
+ */
 class TorrentRequest extends Model
 {
+    use Auditable;
+
     /**
      * The Attributes That Should Be Mutated To Dates.
      *
@@ -128,17 +199,37 @@ class TorrentRequest extends Model
     }
 
     /**
+     * Set The Requests Description After Its Been Purified.
+     *
+     * @param string $value
+     *
+     * @return void
+     */
+    public function setDescriptionAttribute($value)
+    {
+        $antiXss = new AntiXSS();
+
+        $this->attributes['description'] = $antiXss->xss_clean($value);
+    }
+
+    /**
      * Parse Description And Return Valid HTML.
      *
      * @return string Parsed BBCODE To HTML
      */
     public function getDescriptionHtml()
     {
-        return Bbcode::parse($this->description);
+        $bbcode = new Bbcode();
+        $linkify = new Linkify();
+
+        return $bbcode->parse($linkify->linky($this->description), true);
     }
 
     /**
      * Notify Requester When A New Action Is Taken.
+     *
+     * @param $type
+     * @param $payload
      *
      * @return bool
      */

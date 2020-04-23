@@ -1,34 +1,30 @@
 <?php
+/**
+ * NOTICE OF LICENSE.
+ *
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
+ * The details is bundled with this project in the file LICENSE.txt.
+ *
+ * @project    UNIT3D Community Edition
+ *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
+ * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
+ */
 
 return [
-    // Chat
-    'chatbox'          => 'Chat Box',
-    'click'            => 'Clique',
-    'to-enable-editor' => 'para ativar o editor',
-
-    // Featured Torrents
-    'featured-by'             => 'Destacado por',
-    'featured-torrents'       => 'Torrents em destaque',
-    'featured-torrents-intro' => 'Descarregue enquanto pode!',
-    'featured-until'          => 'Este torrent está destacado até',
-
-    // Latest Torrents
-    'latest-torrents' => 'Últimos torrents',
-
-    // Latest Posts
-    'latest-posts' => 'Últimos posts',
-
-    // Latest Topics
-    'latest-topics' => 'Tópicos recentes',
-
-    // Users Online
-    'active-in-last' => 'Activo nos últimos',
-    'users-online'   => 'Utilizadores online',
-
-    // News/Articles
-    'check-news' => 'Notícias (verifique diariamente)',
-    'new-news'   => 'Novas notícias',
-
-    // Top torrents
-    'new-torrents' => 'Novos torrents',
+  'chatbox' => 'Janela de chat',
+  'click' => 'Clique',
+  'to-enable-editor' => 'para habilitar o editor',
+  'featured-by' => 'Caracterizado por',
+  'featured-torrents' => 'Torrents em destaque',
+  'featured-torrents-intro' => 'Pegue eles enquanto você pode!',
+  'featured-until' => 'Isso é caracterizado torrent até',
+  'top-torrents' => 'Top Torrents',
+  'latest-posts' => 'Últimas postagens',
+  'latest-topics' => 'Tópicos mais recentes',
+  'active-in-last' => 'Ativo no último',
+  'users-online' => 'Usuários online',
+  'check-news' => 'Notícias (cheque diariamente)',
+  'new-news' => 'Novas notícias',
+  'new-torrents' => 'Torrents novos',
 ];

@@ -2,55 +2,45 @@
 /**
  * NOTICE OF LICENSE.
  *
- * UNIT3D is open-sourced software licensed under the GNU General Public License v3.0
+ * UNIT3D Community Edition is open-sourced software licensed under the GNU Affero General Public License v3.0
  * The details is bundled with this project in the file LICENSE.txt.
  *
- * @project    UNIT3D
+ * @project    UNIT3D Community Edition
  *
+ * @author     HDVinnie <hdinnovations@protonmail.com>
  * @license    https://www.gnu.org/licenses/agpl-3.0.en.html/ GNU Affero General Public License v3.0
- * @author     HDVinnie
  */
 
 namespace App\Http\Controllers;
 
 use App\Models\Thank;
 use App\Models\Torrent;
-use Brian2694\Toastr\Toastr;
+use Illuminate\Http\Request;
 
 class ThankController extends Controller
 {
     /**
-     * @var Toastr
-     */
-    private $toastr;
-
-    /**
-     * ThankController Constructor.
+     * Store A New Thank.
      *
-     * @param Toastr $toastr
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Torrent      $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __construct(Toastr $toastr)
+    public function store(Request $request, $id)
     {
-        $this->toastr = $toastr;
-    }
-
-    /**
-     * Thank A Torrent Uploader.
-     *
-     * @param $slug
-     * @param $id
-     *
-     * @return Illuminate\Http\RedirectResponse
-     */
-    public function torrentThank($slug, $id)
-    {
-        $user = auth()->user();
+        $user = $request->user();
         $torrent = Torrent::findOrFail($id);
+
+        if ($user->id === $torrent->user_id) {
+            return redirect()->route('torrent', ['id' => $torrent->id])
+                ->withErrors('You Cannot Thank Your Own Torrent!');
+        }
 
         $thank = Thank::where('user_id', '=', $user->id)->where('torrent_id', '=', $torrent->id)->first();
         if ($thank) {
-            return redirect()->route('torrent', ['slug' => $torrent->slug, 'id' => $torrent->id])
-                ->with($this->toastr->error('You Have Already Thanked On This Torrent!', 'Whoops!', ['options']));
+            return redirect()->route('torrent', ['id' => $torrent->id])
+                ->withErrors('You Have Already Thanked On This Torrent!');
         }
 
         $thank = new Thank();
@@ -63,7 +53,7 @@ class ThankController extends Controller
             $torrent->notifyUploader('thank', $thank);
         }
 
-        return redirect()->route('torrent', ['slug' => $torrent->slug, 'id' => $torrent->id])
-            ->with($this->toastr->success('Your Thank Was Successfully Applied!', 'Yay!', ['options']));
+        return redirect()->route('torrent', ['id' => $torrent->id])
+            ->withSuccess('Your Thank Was Successfully Applied!');
     }
 }
